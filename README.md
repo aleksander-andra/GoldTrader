@@ -86,8 +86,13 @@ AI instructions for GitHub Copilot are available in `.github/copilot-instruction
 The `.windsurfrules` file contains AI configuration for Windsurf.
 
 ## Contributing
-
+ 
 Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
+
+## Project Docs
+
+- Product Requirements Document (PRD): ./.ai/PRD.md
+- Environment variables example: ./docs/env.example
 
 ## License
 
