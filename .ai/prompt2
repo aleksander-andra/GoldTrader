@@ -1,0 +1,26 @@
+Jesteś PM. Na podstawie <project_description> i <answers> wygeneruj kompletny PRD (Markdown, PL) dla projektu GoldTrader.
+
+Wymagane sekcje (nagłówki dokładnie jak poniżej):
+1. Wizja, cel i zakres (MVP vs poza zakresem)
+2. Persony, role i uprawnienia (ACL)
+3. User Journeys (UJ‑1..n) – krótkie przepływy
+4. Wymagania funkcjonalne (Auth, Assets, Strategies, Signals, Admin)
+5. Model danych (ERD ASCII + klucze/indeksy; uwaga: używamy Supabase Auth – brak własnej tabeli users)
+6. Kontrakt API (OpenAPI‑like: ścieżki, request/response, kody)
+7. Reguły biznesowe i walidacje (np. confidence 0..100, RR ≥ 1.0, top‑K=10/dzień)
+8. Niefunkcjonalne (wydajność, bezpieczeństwo, obserwowalność)
+9. Test Strategy (Playwright E2E: login±, CRUD assets, generate‑signal; artefakty)
+10. UI/UX (widoki, stany empty/loading/error; wskazówki Astro SSR/prerender)
+11. CI/CD i środowiska (GitHub Actions + Vercel; Preview/Prod; sekrety/ENV)
+12. Bezpieczeństwo (RLS/ACL, cookies HttpOnly, nagłówki, rate limit – poza MVP)
+13. Plan migracji i seed (kolejność; dane startowe)
+14. Ryzyka i mitigacje
+15. Roadmap (Sprint 0..3 z DoD)
+16. DoR/DoD (checklisty)
+17. Checklista „na zielono” pod certyfikat
+
+Dodatkowo:
+- User Stories z AC (Given/When/Then) dla: Auth, CRUD Assets, Generate Signals, (Admin po MVP – szkic).
+- Na końcu dodaj blok „Zmienne środowiskowe (.env.example)”.
+
+Zasady: respektuj decyzje z <answers> (m.in. brak SSE w MVP; K=10; CRUD assets tylko admin; CI/CD: GitHub+Vercel; Supabase Auth). Zwróć wyłącznie gotowy PRD w Markdown.
