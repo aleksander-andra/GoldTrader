@@ -1,0 +1,71 @@
+# Plan Q&A do PRD – GoldTrader
+
+## Pytania do doprecyzowania (z odpowiedziami)
+- [DB] ERD w MVP: Supabase Auth (auth.users) + tabele: profiles, plans, assets, provider_config, signals. Forecasts/llm_logs – poza MVP.
+  Odp: potwierdzam.
+- [DB] Strefa czasu i reset dobowy limitów.
+  Odp: UTC; reset 00:00 UTC.
+- [DB] RLS: czy records są współdzielone do odczytu?
+  Odp: tak, odczyt dla zalogowanych; modyfikacje tylko admin.
+- [API] Autoryzacja i przestrzeń admin.
+  Odp: Supabase JWT w cookie HttpOnly; ścieżki admin pod /api/admin/*.
+- [API] Minimalne ścieżki w MVP i realtime.
+  Odp: /api/assets (CRUD), /api/signals (GET list), /api/admin/generate-signals (POST), /api/admin/providers (GET/POST – po MVP); SSE – nie w MVP.
+- [UI/UX] Widoki MVP i stany.
+  Odp: /login, /dashboard (wykres XAUUSD + lista sygnałów), /assets (lista+formularz); stany loading/empty/error – podstawowe.
+- [Role/ACL] Zakres uprawnień.
+  Odp: CRUD assets tylko admin; user read‑only.
+- [NFR] Cele niefunkcjonalne w MVP.
+  Odp: latencja API < 300 ms (mock), TTI dashboard < 5 s, 5xx < 2%/5 min; rate limit – brak w MVP.
+- [Testy/E2E] Scenariusze.
+  Odp: (1) login pozytywny i negatywny, (2) CRUD assets (admin), (3) generate‑signal → widoczny na liście.
+- [CI/CD] Platforma i deploy.
+  Odp: GitHub Actions + Vercel (Preview/Prod); Cron do generate‑signals – opcjonalnie po MVP.
+
+## Założenia do potwierdzenia
+- [Auth] Supabase Cloud; email+hasło; sesja w cookie HttpOnly.
+- [Assets] Na start only XAUUSD (inne aktywa po MVP).
+- [Signals/Strategy] „mock strategy” wybierająca top‑K dziennie; K = 10.
+- [Hosting/CI] Vercel (Preview/Prod) + GitHub Actions; sekrety przez ENV.
+
+## Ryzyka i trade‑offy
+| Ryzyko | Wpływ | Prawdop. | Mitigacja | Status |
+| --- | --- | --- | --- | --- |
+| Niedomknięcie E2E w czasie | wysoki | średnie | P0: auth+CRUD+logika, minimalny UI | otwarte |
+| Problemy providerów danych | średni | niskie | adapter + MOCK fallback | otwarte |
+| Błędy konfiguracji ENV/sekretów | wysoki | średnie | .env.example + README CI/CD | otwarte |
+
+## Decyzje otwarte (status)
+- [x] CI/CD: A) GitHub Actions + Vercel
+- [x] DB/Auth: A) Supabase Cloud
+- [x] Role/ACL: A) CRUD assets tylko admin
+- [x] Realtime (SSE): A) nie w MVP
+- [x] Top‑K sygnałów: K = 10
+- [x] Panel admina w MVP: B) po MVP
+- [x] Autoryzacja API: A) Supabase JWT w cookie HttpOnly
+- [x] Rate limit: B) brak w MVP
+- [x] Negatywny test logowania: A) dodać
+- [x] Strefa czasu: A) UTC
+
+## Luki
+### DB
+- Doprecyzować definicje tabel (pola/typy), indeksy (m.in. signals: asset_id + created_at), polityki RLS.
+### API
+- Spisać kontrakty JSON (request/response, kody), paginację list (signals).
+### UI
+- Opisać stany empty/error/loading i proste walidacje formularzy.
+### QA (E2E)
+- Test data/seed, trace/video artefakty w CI, smoke na Preview URL.
+
+## Rekomendacje (priorytety)
+- P0: final ERD + kontrakty API + 2–3 E2E (login±, CRUD, generate‑signal) + .env.example + README start.
+- P1: Dashboard wykres + lista sygnałów; monitoring logów; dokumentacja AC/DoR/DoD.
+- P2: Panel admina (providers/plan), SSE stream, rate limit.
+
+## Mapowanie na checklistę certyfikatu
+- Auth/ACL: w zakresie (Supabase Auth, role).
+- CRUD: assets (API + UI) – w zakresie.
+- Logika biznesowa: generate‑signals (mock strategy, K=10) – w zakresie.
+- E2E: login±, CRUD, generate‑signal – w zakresie.
+- CI/CD: GitHub Actions + Vercel – w zakresie.
+- PRD/artefakty: pełny PRD w /.ai/PRD.md – następny krok.

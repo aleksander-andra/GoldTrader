@@ -1,0 +1,26 @@
+Nazwa: GoldTrader (MVP)
+
+Główny problem
+- Inwestorzy indywidualni nie mają prostego narzędzia łączącego dane XAUUSD z czytelnymi sygnałami tradingowymi; istniejące platformy są złożone i rozproszone.
+
+Docelowy użytkownik i potrzeba
+- Użytkownik indywidualny, który chce szybko zobaczyć bieżącą cenę złota, listę prostych sygnałów „BUY/SELL” i podstawowe metryki skuteczności, bez skomplikowanej konfiguracji.
+
+Najmniejszy zestaw funkcjonalności (MVP)
+- Auth/ACL: rejestracja/logowanie email+hasło (Supabase), role: user/admin.
+- Assets: CRUD prostych aktywów (na start XAUUSD jako jedyne aktywo; UI: lista + formularz).
+- Strategies & Signals: interfejs strategii + „mock strategy”, generowanie top‑K sygnałów/dzień; widok listy sygnałów.
+- UI: Dashboard z wykresem XAUUSD + panel sygnałów (bez zaawansowanych wskaźników).
+- Admin: przełączanie providerów danych (Metals‑API / TwelveData / Mock).
+- Testy: min. 1 scenariusz E2E (login → CRUD assets) + scenariusz logiki (generate signal → widoczny).
+
+Poza zakresem MVP (Out of scope)
+- Handel live/łączenie z brokerem, płatności/subskrypcje, push/powiadomienia, multi‑asset portfolio, backtesting i zaawansowane ML, LLM‑asystent; aplikacje mobilne.
+
+Kryteria sukcesu (produktowe i techniczne)
+- Użytkownik widzi aktualne dane XAUUSD i co najmniej 1 wygenerowany sygnał dziennie (mock) — TTI < 5 s od wejścia.
+- 2 kluczowe scenariusze E2E zielone lokalnie i w CI.
+- Średnia latencja API < 300 ms (mock), błędy 5xx < 2%/5 min (dev/prod).
+
+Ograniczenia/progi (constraints)
+- 4 tygodnie, 1 aktywo (XAUUSD), provider danych jako adapter (z mockiem), Supabase Auth/DB, hosting: Vercel lub VPS, Node 22 LTS.
