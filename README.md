@@ -94,6 +94,34 @@ Please follow the AI guidelines and coding practices defined in the AI configura
 - Product Requirements Document (PRD): ./.ai/PRD.md
 - Environment variables example: ./docs/env.example
 
+## Rules & Docs
+
+### 10xRules (AI development standards)
+
+**Astro**
+- Use `.astro` components for static content; server endpoints for API routes
+- SSR when needed; `Astro.cookies` for server-side cookie management
+- `import.meta.env` for environment variables
+
+**React**
+- Functional components + hooks
+- Performance: `React.memo`, `useCallback`/`useMemo`, `useTransition`
+
+**Tailwind**
+- Organize styles with `@layer` directive
+- Use `@apply` for reusable patterns
+- Leverage responsive variants (sm:, md:, lg:) and dark mode
+
+### Documentation References
+
+**Supabase Auth**
+- [Auth UI + createClient setup](https://github.com/supabase/supabase/blob/master/apps/docs/content/guides/auth/auth-helpers/auth-ui.mdx)
+- [MFA & Access Token hooks](https://github.com/supabase/supabase/blob/master/apps/www/_blog/2024-08-14-third-party-auth-mfa-phone-send-hooks.mdx)
+
+**Astro Server Endpoints**
+- [API Endpoints guide](https://github.com/withastro/docs/blob/main/src/content/docs/en/guides/endpoints.mdx)
+- [On-demand rendering](https://github.com/withastro/docs/blob/main/src/content/docs/en/guides/on-demand-rendering.mdx)
+
 ## License
 
 MIT
