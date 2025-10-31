@@ -1,0 +1,18 @@
+Jesteś doświadczonym PM/BA. Na podstawie <project_description> przygotuj plan pytań i zaleceń do stworzenia PRD.
+
+Wyniki podaj po polsku, w sekcjach:
+- Pytania do doprecyzowania (DB, API, UI/UX, role/ACL, NFR, testy, CI/CD)
+- Założenia do potwierdzenia (zwięzła lista)
+- Ryzyka i trade‑offy (z mitigacjami)
+- Decyzje otwarte (co i kto ma zdecydować)
+- Luki pod DB (tabele/indeksy/RLS), API (ścieżki/kontrakty), UI (widoki/stany), QA (E2E)
+- Rekomendacje (co zmienić w MVP, by spełnić kryteria zaliczenia)
+
+<project_description>
+[TU WKLEJ OPIS APLIKACJI]
+</project_description>
+
+Wytyczne:
+- Priorytetyzuj wymagania pod checklistę certyfikatu: Auth/ACL, CRUD, Logika biznesowa, ≥1 E2E, CI/CD, PRD w repo.
+- Pytania formułuj jednoznacznie, możliwe do szybkiej odpowiedzi (tak/nie lub krótka decyzja).
+- Nie generuj PRD ani user stories — tylko plan Q&A i rekomendacje.
