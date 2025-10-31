@@ -1,0 +1,79 @@
+Jasne — poniżej krótki, konkretny opis jak u nas powstaje sygnał (BUY/SELL/HOLD) z poziomami wejścia/SL/TP, horyzontem i „prognozowanym ruchem”.
+
+1) Wejścia
+
+Strategia (strategies): type, params_json (np. horizon_minutes_default, min_edge_usd, sl_k_atr, rr, lista assets).
+
+Dane rynkowe: bieżąca cena P_now + (opcjonalnie) prognoza na horyzont F_h i/lub zmienność ATR_1h.
+
+Limity: topK_per_day, unikalność sygnału w oknie czasu.
+
+2) Przepływ (co X minut lub „Run now”)
+sequenceDiagram
+    autonumber
+    participant S as Scheduler (cron)
+    participant R as Edge Function run_strategies
+    participant FEED as Feed/Forecast
+    participant DB as Supabase (Postgres)
+    participant UI as UI (Realtime)
+
+    S->>R: Wyzwolenie
+    R->>DB: Pobierz strategie status=active
+    loop po strategiach i assetach
+        R->>FEED: P_now, F_h, ATR_1h
+        FEED-->>R: dane rynkowe
+        R->>R: Decyzja (BUY/SELL/HOLD)
+        alt BUY/SELL
+            R->>R: Wyznacz entry/SL/TP, confidence, expires_at
+            R->>DB: INSERT INTO signals (...)
+            DB-->>UI: Realtime notify (nowy sygnał)
+        else HOLD
+            R->>R: Pomijamy
+        end
+    end
+
+3) Reguła decyzyjna (typ forecast)
+
+Δ = F_h - P_now
+
+edge = min_edge_usd (próg „przewagi” nad szumem; np. część ATR)
+
+Jeśli Δ ≥ edge → BUY
+
+Jeśli Δ ≤ -edge → SELL
+
+Inaczej HOLD (nic nie zapisujemy).
+
+4) Poziomy i pola w signals
+
+Dla BUY (analogicznie SELL odwrotnie):
+
+entry = P_now
+
+SL = entry − sl_k_atr * ATR_1h
+
+TP1:
+
+wariant A: TP1 = F_h (cel = prognoza),
+
+wariant B: TP1 = entry + RR * (entry−SL) (np. RR=2).
+
+TP2 (opcjonalnie): kolejny krok zysku.
+
+expected_move_usd = |F_h − P_now|
+
+horizon_minutes = params.horizon_minutes_default
+
+expires_at = now + horizon
+
+confidence ~ rośnie z |Δ| / ATR_1h (np. zmapowane do 0–100).
+
+5) Walidacje/limity przed INSERT
+
+Top-K/dzień na (strategy_id, asset) — nie spamuj.
+
+Unikalność w oknie czasu (np. per minuta/kierunek).
+
+Sanity: dla BUY SL < entry, TP1 > entry (SELL odwrotnie).
+
+RLS: created_by = auth.uid() (lub admin) — właścicielstwo sygnału.

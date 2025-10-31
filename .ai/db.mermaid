@@ -1,0 +1,57 @@
+erDiagram
+    AUTH_USERS {
+        uuid id PK "auth.users"
+    }
+
+    PROFILES {
+        uuid user_id PK FK "-> auth.users.id"
+        text role "admin|user"
+        jsonb settings_json "default {}"
+        timestamptz created_at
+    }
+
+    ASSETS {
+        uuid id PK
+        text symbol "UNIQUE"
+        text name
+        text currency
+        numeric usd_per_unit "12,5 default 1"
+        timestamptz created_at
+    }
+
+    STRATEGIES {
+        uuid id PK
+        text name
+        text type "forecast|rule_based|..."
+        jsonb params_json "default {}"
+        text status "active|draft|paused"
+        uuid created_by FK "-> profiles.user_id"
+        timestamptz created_at
+    }
+
+    SIGNALS {
+        uuid id PK
+        uuid strategy_id FK "-> strategies.id"
+        uuid asset_id FK "-> assets.id"
+        uuid created_by FK "-> profiles.user_id"
+        timestamptz ts
+        text type "BUY|SELL|HOLD"
+        int confidence "[0..100]"
+        numeric entry "12,5"
+        numeric sl "12,5"
+        numeric tp1 "12,5"
+        numeric tp2 "12,5 NULL"
+        numeric expected_move_usd "12,2"
+        int horizon_minutes
+        timestamptz expires_at
+        jsonb meta_json "default {}"
+        text note
+        timestamptz created_at
+    }
+
+    %% Relacje
+    AUTH_USERS ||--o| PROFILES   : "1 -> 0..1 (user_id)"
+    PROFILES   ||--o{ STRATEGIES : "1 -> * (created_by)"
+    PROFILES   ||--o{ SIGNALS    : "1 -> * (created_by)"
+    STRATEGIES ||--o{ SIGNALS    : "1 -> * (strategy_id)"
+    ASSETS     ||--o{ SIGNALS    : "1 -> * (asset_id)"
