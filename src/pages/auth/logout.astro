@@ -1,0 +1,22 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Wylogowanie">
+  <div class="max-w-md mx-auto my-10 text-center space-y-4">
+    <p>Wylogowuję...</p>
+  </div>
+
+  <script>
+    import { supabaseBrowser } from '../../lib/auth/browserClient';
+    (async () => {
+      try {
+        await supabaseBrowser.auth.signOut();
+      } finally {
+        window.location.assign('/');
+      }
+    })();
+  </script>
+</Layout>
+
+

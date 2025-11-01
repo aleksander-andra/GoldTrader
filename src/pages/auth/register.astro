@@ -1,0 +1,14 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { RegisterForm } from "../../components/auth/RegisterForm";
+---
+
+<Layout title="Rejestracja">
+  <h1 class="text-2xl font-semibold text-center my-6">Rejestracja</h1>
+  <RegisterForm client:load />
+  <p class="text-center mt-4">
+    Masz już konto? <a href="/auth/login" class="text-blue-600">Zaloguj się</a>
+  </p>
+</Layout>
+
+
