@@ -1,3 +1,12 @@
+# Env files (should never be committed)
+.env
+.env.local
+.env.*
+!.env.example
+
+# Supabase local state
+supabase/.temp/
+
 # build output
 dist/
 
