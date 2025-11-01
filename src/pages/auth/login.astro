@@ -1,0 +1,14 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { LoginForm } from "../../components/auth/LoginForm";
+---
+
+<Layout title="Logowanie">
+  <h1 class="text-2xl font-semibold text-center my-6">Logowanie</h1>
+  <LoginForm client:load />
+  <p class="text-center mt-4">
+    Nie masz konta? <a href="/auth/register" class="text-blue-600">Zarejestruj się</a>
+  </p>
+</Layout>
+
+
