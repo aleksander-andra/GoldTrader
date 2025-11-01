@@ -46,5 +46,3 @@ export function LoginForm() {
     </form>
   );
 }
-
-
