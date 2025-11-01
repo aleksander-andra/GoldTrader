@@ -20,6 +20,8 @@ const baseConfig = tseslint.config({
   rules: {
     "no-console": "warn",
     "no-unused-vars": "off",
+    // Normalize Prettier on Windows to avoid CRLF errors in CI/lint
+    "prettier/prettier": ["error", { endOfLine: "auto" }],
   },
 });
 

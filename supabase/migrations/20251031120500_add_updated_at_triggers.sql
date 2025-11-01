@@ -52,4 +52,3 @@ end $$;
 comment on column public.strategies.updated_at is 'auto-updated on each update by trigger';
 
 commit;
-
