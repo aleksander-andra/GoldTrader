@@ -8,10 +8,13 @@ import Layout from "../../layouts/Layout.astro";
   </div>
 
   <script>
-    import { supabaseBrowser } from '../../lib/auth/browserClient';
+    import { getSupabaseBrowser } from '../../lib/auth/browserClient';
     (async () => {
       try {
-        await supabaseBrowser.auth.signOut();
+        const supabase = getSupabaseBrowser();
+        if (supabase) {
+          await supabase.auth.signOut();
+        }
       } finally {
         window.location.assign('/');
       }
