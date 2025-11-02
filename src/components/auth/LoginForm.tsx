@@ -1,5 +1,5 @@
 import React from "react";
-import { supabaseBrowser } from "../../lib/auth/browserClient";
+import { getSupabaseBrowser } from "../../lib/auth/browserClient";
 import { Button } from "../../components/ui/button";
 
 export function LoginForm() {
@@ -12,7 +12,13 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
+    const supabase = getSupabaseBrowser();
+    if (!supabase) {
+      setError("Brak konfiguracji PUBLIC_SUPABASE_URL/PUBLIC_SUPABASE_ANON_KEY");
+      setLoading(false);
+      return;
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -30,6 +36,7 @@ export function LoginForm() {
         onChange={(e) => setEmail(e.target.value)}
         className="w-full border rounded px-3 py-2"
         required
+        autoComplete="email"
       />
       <input
         type="password"
@@ -38,6 +45,7 @@ export function LoginForm() {
         onChange={(e) => setPassword(e.target.value)}
         className="w-full border rounded px-3 py-2"
         required
+        autoComplete="current-password"
       />
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <Button type="submit" disabled={loading}>

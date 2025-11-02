@@ -1,5 +1,6 @@
+/* eslint-disable prettier/prettier */
 import React from "react";
-import { supabaseBrowser } from "../../lib/auth/browserClient";
+import { getSupabaseBrowser } from "../../lib/auth/browserClient";
 import { Button } from "../../components/ui/button";
 
 export function RegisterForm() {
@@ -14,7 +15,13 @@ export function RegisterForm() {
     setError(null);
     setInfo(null);
     setLoading(true);
-    const { error } = await supabaseBrowser.auth.signUp({ email, password });
+    const supabase = getSupabaseBrowser();
+    if (!supabase) {
+      setError("Brak konfiguracji PUBLIC_SUPABASE_URL/PUBLIC_SUPABASE_ANON_KEY");
+      setLoading(false);
+      return;
+    }
+    const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -32,6 +39,7 @@ export function RegisterForm() {
         onChange={(e) => setEmail(e.target.value)}
         className="w-full border rounded px-3 py-2"
         required
+        autoComplete="email"
       />
       <input
         type="password"
@@ -40,6 +48,7 @@ export function RegisterForm() {
         onChange={(e) => setPassword(e.target.value)}
         className="w-full border rounded px-3 py-2"
         required
+        autoComplete="new-password"
       />
       {error && <p className="text-red-600 text-sm">{error}</p>}
       {info && <p className="text-green-700 text-sm">{info}</p>}
@@ -49,5 +58,4 @@ export function RegisterForm() {
     </form>
   );
 }
-
 
