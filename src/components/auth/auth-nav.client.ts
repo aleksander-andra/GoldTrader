@@ -19,6 +19,7 @@ import { getSupabaseBrowser } from "../../lib/auth/browserClient";
       logout?.classList.add("hidden");
     }
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e);
   }
 })();
