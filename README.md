@@ -41,6 +41,46 @@ npm run dev
 npm run build
 ```
 
+## How to run locally (GoldTrader)
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Configure environment variables:
+
+```bash
+# create local env file from example
+copy docs\env.example .env.local   # Windows PowerShell: Copy-Item docs/env.example .env.local
+```
+
+Fill the keys in `.env.local`:
+
+```env
+# Server-side (Astro on Node)
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_ANON_KEY=sb_publishable_...
+
+# Client-side (browser)
+PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
+
+# Optional app base (used by smoke)
+APP_URL=http://localhost:4321
+```
+
+Tip: For local Supabase, use “Publishable key” as anon; do not use the secret key in the client.
+
+3. Run the dev server (Astro on port 4321):
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:4321`.
+
 ## Available Scripts
 
 - `npm run dev` - Start development server
@@ -48,6 +88,26 @@ npm run build
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
+- `npm run smoke` - Run smoke checks against APP_URL (defaults to http://localhost:4321)
+
+## Smoke tests
+
+Quick availability checks for key routes. By default they target `http://localhost:4321`. To override, set `APP_URL` in your environment or `.env.local`.
+
+Run:
+
+```bash
+npm run smoke
+```
+
+Expected output (example):
+
+```text
+OK   http://localhost:4321/
+OK   http://localhost:4321/api/health {status=ok}
+OK   http://localhost:4321/auth/login
+OK   http://localhost:4321/auth/register
+```
 
 ## Project Structure
 
