@@ -53,14 +53,50 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 ### Ostatni raport (wklej tutaj wynik z „check-mvp”)
 
 ```
-(wklej zawartość raportu 10x-mvp-tracker)
+10xDevs MVP status (check-mvp)
+Overall: ~35% complete
+
+Documentation: PARTIAL
+PRD in docs/PRD.md and docs/env.example present
+README missing “How to start” + ENV/Deploy guide
+
+Login (Auth): PARTIAL
+Supabase client + middleware + login/register/logout pages OK
+RBAC (user/admin) not implemented
+
+Tests: PARTIAL
+Smoke script exists and passes (npm run smoke)
+Playwright E2E not added
+
+Business Logic: TODO
+Mock signals/top‑K/day, admin CRUD for assets not done
+
+CI/CD: TODO
+No GitHub Actions (lint/typecheck/build/e2e), no Vercel preview/prod
+
+Database: PARTIAL
+Schema and types OK (profiles, assets, strategies, signals)
+RLS/seed (admin profile, XAUUSD) not finalized
+
+API (Etap 1): PARTIAL
+GET /api/health OK
+/api/assets list OK; by id/CRUD admin, signals, generate-signals missing
+
+Source tool: 10x-mvp-tracker guidelines https://github.com/przeprogramowani/10x-mvp-tracker
+
+Next 5 quick wins
+Add README “How to run locally” + ENV section; link smoke tests
+Implement GET /api/assets/[id].ts and simple 404 handling
+Seed XAUUSD + basic RLS confirmation; document how to apply migrations
+Add GitHub Action: lint + build + smoke (curl health)
+Add Playwright baseline test: opens /, /auth/login, /api/health returns 200
 ```
 
 ### Historia raportów
 
 | Data | Ukończenie | Najważniejsze rekomendacje |
 | ---- | ---------- | --------------------------- |
-|      |            |                             |
+| 2025-11-05 | ~35% | README run guide; assets by id; seed XAUUSD/RLS; CI smoke; Playwright baseline |
 
 ### Notatki i decyzje
 
