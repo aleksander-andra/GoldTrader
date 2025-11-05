@@ -8,12 +8,12 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 
 - [ ] Dokumentacja
   - [ ] README uzupełnione o „Jak startujemy” i instrukcje ENV/Deploy
-  - [ ] PRD dostępny w `docs/PRD.md` (sekcja „MVP Scope (Etap 1)”) 
-  - [ ] `docs/env.example` kompletne i aktualne
+  - [x] PRD dostępny w `docs/PRD.md` (sekcja „MVP Scope (Etap 1)”) 
+  - [x] `docs/env.example` kompletne i aktualne
 
 - [ ] Logowanie (Auth)
-  - [ ] Supabase skonfigurowany (URL/KEY, `supabase.client.ts`, middleware)
-  - [ ] UI logowanie/rejestracja/wylogowanie
+  - [x] Supabase skonfigurowany (URL/KEY, `supabase.client.ts`, middleware)
+  - [x] UI logowanie/rejestracja/wylogowanie
   - [ ] RBAC (user/admin) — bez planów taryfowych w Etapie 1
 
 - [ ] Testy
@@ -31,13 +31,13 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
   - [ ] (Po MVP) Vercel Cron: `/api/admin/generate-signals`
 
 - [ ] Baza danych
-  - [ ] Schemat w Supabase: `profiles`, `assets`, `strategies`, `signals`
+  - [x] Schemat w Supabase: `profiles`, `assets`, `strategies`, `signals`
   - [ ] RLS i seed (admin profil, XAUUSD)
-  - [ ] `src/db/database.types.ts` wygenerowany
+  - [x] `src/db/database.types.ts` wygenerowany
   - [ ] (Po MVP) `plans`, `provider_config`, `forecasts`, `llm_queries`, `citations`
 
 - [ ] API (Etap 1 minimalny)
-  - [ ] `GET /api/health`
+  - [x] `GET /api/health`
   - [ ] `GET /api/assets`, `POST/PATCH/DELETE /api/assets` (admin)
   - [ ] `GET /api/signals`
   - [ ] `POST /api/admin/generate-signals`
