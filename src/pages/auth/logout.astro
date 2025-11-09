@@ -7,19 +7,7 @@ import Layout from "../../layouts/Layout.astro";
     <p>Wylogowuję...</p>
   </div>
 
-  <script type="module">
-    import { getSupabaseBrowser } from '../../lib/auth/browserClient';
-    (async () => {
-      try {
-        const supabase = getSupabaseBrowser();
-        if (supabase) {
-          await supabase.auth.signOut();
-        }
-      } finally {
-        window.location.assign('/');
-      }
-    })();
-  </script>
+  <script type="module" src="/src/pages/auth/logout.client.ts"></script>
 </Layout>
 
 
