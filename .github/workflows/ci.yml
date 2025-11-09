@@ -10,7 +10,6 @@ jobs:
   lint-build-smoke:
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: production
       APP_URL: http://localhost:4321
       SUPABASE_URL: http://localhost
       SUPABASE_ANON_KEY: sb_publishable_dummy
