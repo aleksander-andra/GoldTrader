@@ -27,7 +27,7 @@ jobs:
           cache: npm
 
       - name: Install
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Lint
         run: npm run lint
@@ -43,8 +43,12 @@ jobs:
       - name: Wait for server
         run: npx --yes wait-on http://localhost:4321
 
-      - name: Smoke tests
-        run: npm run smoke
+      - name: Smoke tests (curl)
+        run: |
+          curl -fsS http://localhost:4321/ > /dev/null
+          curl -fsS http://localhost:4321/api/health | grep -q '\"status\":\"ok\"'
+          curl -fsS http://localhost:4321/auth/login > /dev/null
+          curl -fsS http://localhost:4321/auth/register > /dev/null
 
       - name: Upload preview logs on failure
         if: failure()
