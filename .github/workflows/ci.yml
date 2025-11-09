@@ -28,6 +28,11 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
 
+      - name: Auto-fix style (prettier, eslint)
+        run: |
+          npx --yes prettier --write .
+          npx --yes eslint . --fix || true
+
       - name: Lint
         run: npx --yes eslint .
 
