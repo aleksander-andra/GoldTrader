@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  lint-build-smoke:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      APP_URL: http://localhost:4321
+      SUPABASE_URL: http://localhost
+      SUPABASE_ANON_KEY: sb_publishable_dummy
+      PUBLIC_SUPABASE_URL: http://localhost
+      PUBLIC_SUPABASE_ANON_KEY: sb_publishable_dummy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Start preview
+        run: |
+          nohup npm run preview -- --port 4321 --host > preview.log 2>&1 &
+          echo $! > preview.pid
+
+      - name: Wait for server
+        run: npx --yes wait-on http://localhost:4321
+
+      - name: Smoke tests
+        run: npm run smoke
+
+      - name: Upload preview logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-logs
+          path: preview.log
+
+      - name: Stop preview
+        if: always()
+        run: kill $(cat preview.pid) || true
+
+
