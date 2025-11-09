@@ -24,4 +24,3 @@ import { getSupabaseBrowser } from "../../lib/auth/browserClient";
   }
 })();
 
-
