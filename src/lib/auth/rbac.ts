@@ -1,5 +1,5 @@
 import type { APIContext } from "astro";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../../db/database.types";
 
 type Ok<T> = { ok: true; value: T };
@@ -59,8 +59,18 @@ export async function requireAdmin(
   const userRes = await requireUser(context);
   if (!userRes.ok) return userRes;
 
-  const supabase = context.locals.supabase as SupabaseClient<Database>;
-  const { data: profile, error: profileError } = await supabase
+  // Use a client authorized with the same bearer token to satisfy RLS during the role check
+  const token = getBearerToken(context);
+  const url = import.meta.env.SUPABASE_URL;
+  const anon = import.meta.env.SUPABASE_ANON_KEY;
+  if (!url || !anon || !token) {
+    return forbidden("Cannot verify role");
+  }
+  const authed = createClient<Database>(url, anon, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+
+  const { data: profile, error: profileError } = await authed
     .from("profiles")
     .select("role")
     .eq("user_id", userRes.value.userId)
