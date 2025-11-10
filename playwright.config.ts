@@ -18,6 +18,7 @@ const config: PlaywrightTestConfig = {
     baseURL,
   },
   reporter: [["list"]],
+  globalTeardown: "./tests/globalTeardown.ts",
 };
 
 export default config;
