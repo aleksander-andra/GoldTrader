@@ -2,6 +2,7 @@ import type { APIContext } from "astro";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../../db/database.types";
 import { requireAdmin } from "../../../lib/auth/rbac";
+import { enforceDailyLimit } from "../../../lib/limits/daily";
 
 export const prerender = false;
 
@@ -21,6 +22,10 @@ export async function GET(context: APIContext) {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  // Daily limit for reading single asset (per user, per day)
+  const limit = await enforceDailyLimit(context, "assets:get", 100);
+  if (!limit.ok) return limit.response;
 
   const url = import.meta.env.SUPABASE_URL;
   const anon = import.meta.env.SUPABASE_ANON_KEY;
@@ -53,7 +58,11 @@ export async function GET(context: APIContext) {
     }
 
     return new Response(JSON.stringify({ item: data }), {
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": String(limit.limit),
+        "X-RateLimit-Remaining": String(limit.remaining),
+      },
     });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : "Unknown error";
