@@ -2,11 +2,16 @@ import type { APIContext } from "astro";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../../db/database.types";
 import { requireAdmin } from "../../../lib/auth/rbac";
+import { enforceDailyLimit } from "../../../lib/limits/daily";
 
 export const prerender = false;
 
 // GET /api/assets
 export async function GET(context: APIContext) {
+  // Daily limit for listing assets (per user, per day)
+  const limit = await enforceDailyLimit(context, "assets:list", 100);
+  if (!limit.ok) return limit.response;
+
   const authHeader = context.request.headers.get("authorization");
   if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -37,7 +42,11 @@ export async function GET(context: APIContext) {
     });
   }
   return new Response(JSON.stringify({ items: data }), {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-RateLimit-Limit": String(limit.limit),
+      "X-RateLimit-Remaining": String(limit.remaining),
+    },
   });
 }
 
