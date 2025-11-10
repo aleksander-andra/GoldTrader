@@ -24,7 +24,10 @@ test("403 with user token", async () => {
   );
   const token = await getToken(process.env.E2E_USER_EMAIL, process.env.E2E_USER_PASS);
   test.skip(!token, "Could not obtain user token");
-  const ctx = await request.newContext({ baseURL: process.env.APP_URL || "http://localhost:4321", extraHTTPHeaders: { Authorization: `Bearer ${token}` } });
+  const ctx = await request.newContext({
+    baseURL: process.env.APP_URL || "http://localhost:4321",
+    extraHTTPHeaders: { Authorization: `Bearer ${token}` },
+  });
   const r = await ctx.get("/api/admin/ping");
   expect(r.status()).toBe(403);
 });
@@ -36,11 +39,12 @@ test("200 with admin token", async () => {
   );
   const token = await getToken(process.env.E2E_ADMIN_EMAIL, process.env.E2E_ADMIN_PASS);
   test.skip(!token, "Could not obtain admin token");
-  const ctx = await request.newContext({ baseURL: process.env.APP_URL || "http://localhost:4321", extraHTTPHeaders: { Authorization: `Bearer ${token}` } });
+  const ctx = await request.newContext({
+    baseURL: process.env.APP_URL || "http://localhost:4321",
+    extraHTTPHeaders: { Authorization: `Bearer ${token}` },
+  });
   const r = await ctx.get("/api/admin/ping");
   expect(r.status()).toBe(200);
   const json = await r.json();
   expect(json).toEqual({ ok: true });
 });
-
-
