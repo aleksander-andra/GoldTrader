@@ -81,20 +81,8 @@ jobs:
       - name: Sanitize Supabase config for CLI compatibility
         run: |
           if [ -f supabase/config.toml ]; then
-            # Drop entire sections that cause parsing issues with certain CLI builds
-            awk 'BEGIN{skip=0} \
-            /^\[(db\.pooler|db\.seed|db\.migrations|db\.network_restrictions|auth\.oauth_server|auth\.rate_limit)\]/{skip=1; next} \
-            /^\[/{ if (skip) { skip=0; print; next } } \
-            { if (!skip) print }' supabase/config.toml > supabase/config.cleaned.toml || true
-            if [ -s supabase/config.cleaned.toml ]; then mv supabase/config.cleaned.toml supabase/config.toml; fi
-
-            # Extra line-level safety
-            sed -i '/oauth_server/d' supabase/config.toml || true
-            sed -i '/web3/d' supabase/config.toml || true
-            sed -i '/email_optional/d' supabase/config.toml || true
-            sed -i '/rate_limit/d' supabase/config.toml || true
-            sed -i '/network_restrictions/d' supabase/config.toml || true
-            sed -i '/migrations/d' supabase/config.toml || true
+            cp supabase/config.toml supabase/config.toml.bak || true
+            printf '%s\n' 'project_id = "GoldTrader-CI"' '' '[db]' 'major_version = 15' > supabase/config.toml
           fi
 
       - name: Link Supabase project
