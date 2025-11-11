@@ -81,13 +81,14 @@ jobs:
       - name: Sanitize Supabase config for CLI compatibility
         run: |
           if [ -f supabase/config.toml ]; then
-            # Drop entire [db.pooler] section to avoid duplicate key parsing errors in CLI
+            # Drop entire sections that cause parsing issues with certain CLI builds
             awk 'BEGIN{skip=0} \
-            /^\[db\.pooler\]/{skip=1; next} \
+            /^\[(db\.pooler|db\.seed|db\.migrations|db\.network_restrictions|auth\.oauth_server|auth\.rate_limit)\]/{skip=1; next} \
             /^\[/{ if (skip) { skip=0; print; next } } \
             { if (!skip) print }' supabase/config.toml > supabase/config.cleaned.toml || true
             if [ -s supabase/config.cleaned.toml ]; then mv supabase/config.cleaned.toml supabase/config.toml; fi
 
+            # Extra line-level safety
             sed -i '/oauth_server/d' supabase/config.toml || true
             sed -i '/web3/d' supabase/config.toml || true
             sed -i '/email_optional/d' supabase/config.toml || true
