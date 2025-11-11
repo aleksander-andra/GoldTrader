@@ -81,9 +81,8 @@ jobs:
       - name: Sanitize Supabase config for CLI compatibility
         run: |
           if [ -f supabase/config.toml ]; then
-            # Replace with a minimal CI-safe config to avoid parser conflicts
             cp supabase/config.toml supabase/config.toml.bak || true
-            printf '%s\n' 'project_id = "GoldTrader-CI"' '' '[db]' 'major_version = 17' > supabase/config.toml
+            printf '%s\n' 'project_id = "GoldTrader-CI"' '' '[db]' 'major_version = 15' > supabase/config.toml
           fi
 
       - name: Link Supabase project
