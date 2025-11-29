@@ -5,6 +5,9 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import node from "@astrojs/node";
+import vercel from "@astrojs/vercel/server";
+
+const isVercel = process.env.VERCEL === "1";
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,7 +17,11 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  adapter: node({
-    mode: "standalone",
-  }),
+  adapter: isVercel
+    ? vercel({
+        runtime: "nodejs22.x",
+      })
+    : node({
+        mode: "standalone",
+      }),
 });
