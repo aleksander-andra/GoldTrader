@@ -1,10 +1,15 @@
 // @ts-check
+/* eslint-env node */
 import { defineConfig } from "astro/config";
 
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import node from "@astrojs/node";
+import vercel from "@astrojs/vercel/serverless";
+
+// eslint-disable-next-line no-undef
+const isVercel = process.env.VERCEL === "1";
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,7 +19,9 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  adapter: node({
-    mode: "standalone",
-  }),
+  adapter: isVercel
+    ? vercel()
+    : node({
+        mode: "standalone",
+      }),
 });
