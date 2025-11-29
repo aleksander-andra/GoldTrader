@@ -6,7 +6,7 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import node from "@astrojs/node";
-import vercel from "@astrojs/vercel/server";
+import vercel from "@astrojs/vercel/serverless";
 
 // eslint-disable-next-line no-undef
 const isVercel = process.env.VERCEL === "1";
@@ -20,9 +20,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   adapter: isVercel
-    ? vercel({
-        runtime: "nodejs22.x",
-      })
+    ? vercel()
     : node({
         mode: "standalone",
       }),
