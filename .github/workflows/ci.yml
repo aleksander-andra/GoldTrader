@@ -81,6 +81,13 @@ jobs:
         with:
           version: 2.0.0  # możesz też dać "latest"
 
+      - name: Sanitize Supabase config for CLI
+        run: |
+          if [ -f supabase/config.toml ]; then
+            cp supabase/config.toml supabase/config.toml.bak || true
+            printf '%s\n' 'project_id = "GoldTrader-CI"' '' '[db]' 'major_version = 15' > supabase/config.toml
+          fi
+
       - name: Push migrations to Supabase Cloud
         run: |
           if [ -z "${SUPABASE_DB_URL:-}" ]; then
