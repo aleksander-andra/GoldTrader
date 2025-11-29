@@ -37,7 +37,18 @@ begin
   end if;
 end $$;
 
-comment on column public.assets.updated_at is 'auto-updated on each update by trigger';
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'assets'
+      and column_name = 'updated_at'
+  ) then
+    comment on column public.assets.updated_at is 'auto-updated on each update by trigger';
+  end if;
+end $$;
 
 alter table if exists public.strategies
   add column if not exists updated_at timestamptz not null default now();
@@ -61,6 +72,17 @@ begin
   end if;
 end $$;
 
-comment on column public.strategies.updated_at is 'auto-updated on each update by trigger';
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'strategies'
+      and column_name = 'updated_at'
+  ) then
+    comment on column public.strategies.updated_at is 'auto-updated on each update by trigger';
+  end if;
+end $$;
 
 commit;
