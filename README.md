@@ -81,6 +81,58 @@ npm run dev
 
 Open `http://localhost:4321`.
 
+## Deploy na Vercel + Supabase Cloud (GoldTrader)
+
+1. **Przygotuj Supabase Cloud**
+   - Utwórz projekt w Supabase i zapisz jego `Project URL` oraz `anon public key` (zakładka **Project Settings → API**).
+   - Skopiuj plik `docs/env.cloud.example` jako bazę konfiguracji:
+
+   ```bash
+   # lokalnie, do podglądu/edycji (nie commituj prawdziwych kluczy)
+   copy docs\env.cloud.example .env.cloud.local
+   ```
+
+2. **Podłącz repo do Vercel**
+   - Zaloguj się na `https://vercel.com` przez GitHub.
+   - Dodaj nowy projekt z tego repo (`GoldTrader`), ustaw branch produkcyjny na `main`.
+
+3. **Ustaw zmienne środowiskowe w Vercel (Project → Settings → Environment Variables)**
+
+   Ustaw dla środowisk **Production** i **Preview**:
+
+   ```text
+   SUPABASE_URL             = https://TWÓJ_PROJECT_REF.supabase.co
+   SUPABASE_ANON_KEY        = TWÓJ_CLOUD_ANON_KEY
+
+   PUBLIC_SUPABASE_URL      = https://TWÓJ_PROJECT_REF.supabase.co
+   PUBLIC_SUPABASE_ANON_KEY = TWÓJ_CLOUD_ANON_KEY
+
+   APP_URL                  = https://twoj-projekt.vercel.app   # po pierwszym deployu podmień na realny URL
+   NODE_ENV                 = production
+   ```
+
+4. **Skonfiguruj Supabase pod Vercel (redirecty)**
+   - Supabase → **Authentication → URL configuration**:
+     - `Site URL` = `https://twoj-projekt.vercel.app/`
+     - Additional redirect URLs dodaj:
+       - `https://twoj-projekt.vercel.app/auth/reset-password`
+       - `http://localhost:4321/auth/reset-password` (dla dev).
+
+5. **Migracje bazy w CI (GitHub Actions → Secrets and variables → Actions)**
+
+   Zgodnie z `docs/env.cloud.example` i `.github/workflows/ci.yml` ustaw:
+
+   ```text
+   SUPABASE_DB_URL = postgres://postgres:HASŁO@TWÓJ_POOLER_HOST:6543/postgres?sslmode=require
+   ```
+
+   Connection string do Session Poolera (host `*.pooler.supabase.com`, port `6543`) znajdziesz w Supabase → **Database → Connection pooling (Session)**.
+
+6. **Pierwszy deploy**
+   - Zrób mały commit na `main` lub kliknij „Deploy” w Vercel.
+   - Po udanym buildzie aplikacja będzie dostępna pod adresem w stylu `https://gold-trader-one.vercel.app/`.
+   - Zaktualizuj `APP_URL` w Vercel na ten finalny URL.
+
 ## Available Scripts
 
 - `npm run dev` - Start development server
@@ -114,12 +166,12 @@ OK   http://localhost:4321/auth/register
 ```md
 .
 ├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
+│ ├── layouts/ # Astro layouts
+│ ├── pages/ # Astro pages
+│ │ └── api/ # API endpoints
+│ ├── components/ # UI components (Astro & React)
+│ └── assets/ # Static assets
+├── public/ # Public assets
 ```
 
 ## AI Development Support
@@ -146,7 +198,7 @@ AI instructions for GitHub Copilot are available in `.github/copilot-instruction
 The `.windsurfrules` file contains AI configuration for Windsurf.
 
 ## Contributing
- 
+
 Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
 
 ## Project Docs
@@ -159,15 +211,18 @@ Please follow the AI guidelines and coding practices defined in the AI configura
 ### 10xRules (AI development standards)
 
 **Astro**
+
 - Use `.astro` components for static content; server endpoints for API routes
 - SSR when needed; `Astro.cookies` for server-side cookie management
 - `import.meta.env` for environment variables
 
 **React**
+
 - Functional components + hooks
 - Performance: `React.memo`, `useCallback`/`useMemo`, `useTransition`
 
 **Tailwind**
+
 - Organize styles with `@layer` directive
 - Use `@apply` for reusable patterns
 - Leverage responsive variants (sm:, md:, lg:) and dark mode
@@ -175,10 +230,12 @@ Please follow the AI guidelines and coding practices defined in the AI configura
 ### Documentation References
 
 **Supabase Auth**
+
 - [Auth UI + createClient setup](https://github.com/supabase/supabase/blob/master/apps/docs/content/guides/auth/auth-helpers/auth-ui.mdx)
 - [MFA & Access Token hooks](https://github.com/supabase/supabase/blob/master/apps/www/_blog/2024-08-14-third-party-auth-mfa-phone-send-hooks.mdx)
 
 **Astro Server Endpoints**
+
 - [API Endpoints guide](https://github.com/withastro/docs/blob/main/src/content/docs/en/guides/endpoints.mdx)
 - [On-demand rendering](https://github.com/withastro/docs/blob/main/src/content/docs/en/guides/on-demand-rendering.mdx)
 
