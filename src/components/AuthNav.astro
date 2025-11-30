@@ -1,13 +1,9 @@
 ---
-
+import { AuthNavClient } from "./auth/AuthNavClient";
 ---
 
 <header class="w-full border-b border-border/40">
   <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-end gap-4 text-sm">
-    <a href="/auth/login" id="link-login" class="text-blue-600 hover:underline">Logowanie</a>
-    <a href="/auth/register" id="link-register" class="text-blue-600 hover:underline">Rejestracja</a>
-    <a href="/auth/logout" id="link-logout" class="hidden text-blue-600 hover:underline">Wyloguj</a>
+    <AuthNavClient client:load />
   </nav>
-
-  <script type="module" src="/src/components/auth/auth-nav.client.ts"></script>
 </header>
