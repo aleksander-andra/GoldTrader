@@ -24,10 +24,15 @@ export function RegisterForm() {
     const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
     if (error) {
-      setError(error.message);
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already registered") || msg.includes("already exists")) {
+        setError("Użytkownik z takim adresem email już istnieje. Spróbuj się zalogować lub użyj resetu hasła.");
+      } else {
+        setError(error.message);
+      }
       return;
     }
-    setInfo("Konto utworzone. Sprawdź email (jeśli wymagane) i zaloguj się.");
+    setInfo("Jeśli ten adres nie był wcześniej zarejestrowany, konto zostało utworzone. Sprawdź email (jeśli wymagane) i zaloguj się.");
   }
 
   return (
