@@ -1,13 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import { LogoutClient } from "../../components/auth/LogoutClient";
 ---
 
 <Layout title="Wylogowanie">
   <div class="max-w-md mx-auto my-10 text-center space-y-4">
-    <p>Wylogowuję...</p>
+    <LogoutClient client:load />
   </div>
-
-  <script type="module" src="/src/pages/auth/logout.client.ts"></script>
 </Layout>
-
-
