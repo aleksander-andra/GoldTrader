@@ -1,0 +1,54 @@
+---
+import type { Database } from "../db/database.types";
+
+interface Props {
+  signals: Database["public"]["Tables"]["signals"]["Row"][];
+}
+
+const { signals } = Astro.props;
+---
+
+<section class="max-w-4xl mx-auto mt-10 bg-white/5 border border-white/10 rounded-2xl p-6 text-white">
+  <h2 class="text-xl font-semibold mb-4">Ostatnie sygnały (mock)</h2>
+  {
+    signals.length === 0 ? (
+      <p class="text-sm text-blue-100/80">
+        Brak sygnałów. Jako admin wywołaj endpoint <code>/api/admin/generate-signals</code>, aby wygenerować dane mock.
+      </p>
+    ) : (
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-white/10 text-left">
+              <th class="py-2 pr-4">Czas (UTC)</th>
+              <th class="py-2 pr-4">Typ</th>
+              <th class="py-2 pr-4">Pewność</th>
+              <th class="py-2 pr-4">Strategia</th>
+            </tr>
+          </thead>
+          <tbody>
+            {signals.map((s) => (
+              <tr class="border-b border-white/5 last:border-0">
+                <td class="py-2 pr-4 font-mono text-xs text-blue-100/90">{new Date(s.ts).toISOString()}</td>
+                <td class="py-2 pr-4">
+                  <span
+                    class:list={[
+                      "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold",
+                      s.type === "BUY" && "bg-emerald-500/20 text-emerald-200 border border-emerald-400/40",
+                      s.type === "SELL" && "bg-rose-500/20 text-rose-200 border border-rose-400/40",
+                      s.type === "HOLD" && "bg-slate-500/20 text-slate-200 border border-slate-400/40",
+                    ]}
+                  >
+                    {s.type}
+                  </span>
+                </td>
+                <td class="py-2 pr-4">{s.confidence}%</td>
+                <td class="py-2 pr-4 text-xs font-mono text-blue-100/80">{s.strategy_id}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+</section>
