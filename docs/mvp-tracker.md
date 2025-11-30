@@ -8,7 +8,7 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 
 - [ ] Dokumentacja
   - [ ] README uzupełnione o „Jak startujemy” i instrukcje ENV/Deploy
-  - [x] PRD dostępny w `docs/PRD.md` (sekcja „MVP Scope (Etap 1)”) 
+  - [x] PRD dostępny w `docs/PRD.md` (sekcja „MVP Scope (Etap 1)”)
   - [x] `docs/env.example` kompletne i aktualne
 
 - [ ] Logowanie (Auth)
@@ -54,52 +54,52 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 
 ```
 10xDevs MVP status (check-mvp)
-Overall: ~35% complete
+Overall: ~55% complete
 
-Documentation: PARTIAL
-PRD in docs/PRD.md and docs/env.example present
-README missing “How to start” + ENV/Deploy guide
+Documentation: OK
+PRD in docs/PRD.md; docs/env.example and docs/env.cloud.example present
+README has "How to run locally" + ENV; deploy-to-Vercel still not documented
 
 Login (Auth): PARTIAL
-Supabase client + middleware + login/register/logout pages OK
-RBAC (user/admin) not implemented
+Supabase Cloud configured; middleware + login/register/logout pages OK
+RBAC (user/admin) wiring in API, but roles/plans in UI still minimal
 
 Tests: PARTIAL
 Smoke script exists and passes (npm run smoke)
-Playwright E2E not added
+Playwright E2E not added yet
 
-Business Logic: TODO
-Mock signals/top‑K/day, admin CRUD for assets not done
+Business Logic: PARTIAL
+Assets CRUD (admin) implemented over Supabase; signals/mock strategy still TODO
 
-CI/CD: TODO
-No GitHub Actions (lint/typecheck/build/e2e), no Vercel preview/prod
+CI/CD: PARTIAL
+GitHub Actions present: lint + build + smoke + Supabase Cloud migrations
+Vercel deployment for main branch works; no Vercel Cron yet
 
 Database: PARTIAL
-Schema and types OK (profiles, assets, strategies, signals)
-RLS/seed (admin profile, XAUUSD) not finalized
+Schema and types OK (profiles, assets, strategies, signals) with RLS policies
+Migrations pushed to Supabase Cloud; seeding admin profile / plans still open
 
 API (Etap 1): PARTIAL
 GET /api/health OK
-/api/assets list OK; by id/CRUD admin, signals, generate-signals missing
+/api/assets list + by id + admin CRUD implemented; signals + generate-signals missing
 
-Source tool: 10x-mvp-tracker guidelines https://github.com/przeprogramowani/10x-mvp-tracker
+Source tool: manual check in Cursor using 10x-mvp-tracker guidelines
 
 Next 5 quick wins
-Add README “How to run locally” + ENV section; link smoke tests
-Implement GET /api/assets/[id].ts and simple 404 handling
-Seed XAUUSD + basic RLS confirmation; document how to apply migrations
-Add GitHub Action: lint + build + smoke (curl health)
-Add Playwright baseline test: opens /, /auth/login, /api/health returns 200
+Document deploy-to-Vercel and ENV.cloud in README
+Implement GET /api/signals and simple list view on dashboard
+Seed XAUUSD + admin user in Supabase (SQL or migration) and confirm RLS
+Add GitHub Action step for Playwright baseline test (/, /auth/login, /api/health)
+Start mock signals engine + POST /api/admin/generate-signals (no SSE yet)
 ```
 
 ### Historia raportów
 
-| Data | Ukończenie | Najważniejsze rekomendacje |
-| ---- | ---------- | --------------------------- |
-| 2025-11-05 | ~35% | README run guide; assets by id; seed XAUUSD/RLS; CI smoke; Playwright baseline |
+| Data       | Ukończenie | Najważniejsze rekomendacje                                                                 |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------ |
+| 2025-11-05 | ~35%       | README run guide; assets by id; seed XAUUSD/RLS; CI smoke; Playwright baseline             |
+| 2025-11-29 | ~55%       | CI + Supabase Cloud migrations; Vercel deploy; assets CRUD over Supabase; env.cloud wiring |
 
 ### Notatki i decyzje
 
 - Krótkie zapiski z przeglądów, decyzje architektoniczne, zmiany zakresu.
-
-

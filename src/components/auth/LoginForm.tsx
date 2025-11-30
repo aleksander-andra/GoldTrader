@@ -7,10 +7,12 @@ export function LoginForm() {
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [info, setInfo] = React.useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setLoading(true);
     const supabase = getSupabaseBrowser();
     if (!supabase) {
@@ -25,6 +27,33 @@ export function LoginForm() {
       return;
     }
     window.location.assign("/");
+  }
+
+  async function onResetPasswordClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    setError(null);
+    setInfo(null);
+
+    if (!email) {
+      setError("Podaj adres email, aby zresetować hasło.");
+      return;
+    }
+
+    const supabase = getSupabaseBrowser();
+    if (!supabase) {
+      setError("Brak konfiguracji PUBLIC_SUPABASE_URL/PUBLIC_SUPABASE_ANON_KEY");
+      return;
+    }
+
+    const redirectTo = `${window.location.origin}/auth/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    setInfo("Jeśli konto istnieje, wysłaliśmy link do resetu hasła.");
   }
 
   return (
@@ -48,9 +77,17 @@ export function LoginForm() {
         autoComplete="current-password"
       />
       {error && <p className="text-red-600 text-sm">{error}</p>}
+      {info && <p className="text-green-700 text-sm">{info}</p>}
       <Button type="submit" disabled={loading}>
         {loading ? "Logowanie..." : "Zaloguj"}
       </Button>
+      <button
+        type="button"
+        onClick={onResetPasswordClick}
+        className="w-full text-sm text-blue-600 underline-offset-2 hover:underline"
+      >
+        Nie pamiętasz hasła?
+      </button>
     </form>
   );
 }
