@@ -175,8 +175,8 @@ export function AdminAssetsClient() {
     <section className="space-y-6">
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
         <h2 className="text-lg font-semibold text-slate-900">{editingId ? "Edytuj aktywo" : "Dodaj aktywo"}</h2>
-        <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-[2fr,3fr,1fr,auto] items-end">
-          <div className="space-y-1">
+        <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-4 items-end">
+          <div className="space-y-1 sm:col-span-1">
             <label className="text-xs font-medium text-slate-600" htmlFor="asset-symbol">
               Symbol
             </label>
@@ -190,7 +190,7 @@ export function AdminAssetsClient() {
               required
             />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 sm:col-span-2">
             <label className="text-xs font-medium text-slate-600" htmlFor="asset-name">
               Nazwa
             </label>
@@ -204,7 +204,7 @@ export function AdminAssetsClient() {
               required
             />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 sm:col-span-1">
             <label className="text-xs font-medium text-slate-600" htmlFor="asset-currency">
               Waluta
             </label>
@@ -218,8 +218,8 @@ export function AdminAssetsClient() {
               required
             />
           </div>
-          <div className="flex gap-2">
-            <Button type="submit" disabled={saving} className="w-full">
+          <div className="flex gap-2 justify-end sm:col-span-4">
+            <Button type="submit" disabled={saving}>
               {saving ? "Zapisywanie..." : editingId ? "Zapisz zmiany" : "Dodaj"}
             </Button>
             {editingId && (
@@ -227,7 +227,6 @@ export function AdminAssetsClient() {
                 type="button"
                 variant="outline"
                 disabled={saving}
-                className="w-full"
                 onClick={() => {
                   setEditingId(null);
                   setSymbol("");
