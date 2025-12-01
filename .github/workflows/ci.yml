@@ -54,6 +54,12 @@ jobs:
           curl -fsS http://localhost:4321/auth/login > /dev/null
           curl -fsS http://localhost:4321/auth/register > /dev/null
 
+      - name: Install Playwright browsers
+        run: npx --yes playwright install --with-deps chromium
+
+      - name: E2E tests (Playwright)
+        run: npm run test:e2e
+
       - name: Upload preview logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
