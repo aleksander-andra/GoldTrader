@@ -1,0 +1,16 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { AdminAssetsClient } from "../../components/admin/AdminAssetsClient";
+---
+
+<Layout title="Assets – panel admina">
+  <main class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+    <header class="space-y-2">
+      <h1 class="text-3xl font-semibold text-slate-900">Assets – panel admina</h1>
+      <p class="text-sm text-slate-600">
+        Zarządzaj listą aktywów dostępnych w systemie. Tylko administrator ma dostęp do tej strony.
+      </p>
+    </header>
+    <AdminAssetsClient client:load />
+  </main>
+</Layout>

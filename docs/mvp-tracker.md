@@ -21,13 +21,13 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
   - [ ] (opcjonalnie) testy kontraktowe API
 
 - [ ] Logika biznesowa
-  - [ ] Mock silnik sygnałów + top‑K/dzień
+  - [x] Mock silnik sygnałów + top‑K/dzień
   - [ ] Assets: CRUD (admin)
   - [ ] (Po MVP) Adapter providerów danych i forecasts
 
 - [ ] CI/CD
-  - [ ] GitHub Actions: lint, typecheck, test:e2e, build
-  - [ ] Vercel: Preview dla PR, produkcja na main
+  - [x] GitHub Actions: lint, typecheck, test:e2e, build
+  - [x] Vercel: Preview dla PR, produkcja na main
   - [ ] (Po MVP) Vercel Cron: `/api/admin/generate-signals`
 
 - [ ] Baza danych
@@ -38,9 +38,9 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 
 - [ ] API (Etap 1 minimalny)
   - [x] `GET /api/health`
-  - [ ] `GET /api/assets`, `POST/PATCH/DELETE /api/assets` (admin)
-  - [ ] `GET /api/signals`
-  - [ ] `POST /api/admin/generate-signals`
+  - [x] `GET /api/assets`, `POST/PATCH/DELETE /api/assets` (admin)
+  - [x] `GET /api/signals`
+  - [x] `POST /api/admin/generate-signals`
   - [ ] (Po MVP) `GET/PUT /api/profile`, `GET /api/plans`, `GET/POST /api/admin/providers`
   - [ ] (Po MVP) `GET /api/prices`, SSE (`/api/stream/*`), `GET /api/forecasts`, LLM endpoints
 
@@ -54,26 +54,27 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 
 ```
 10xDevs MVP status (check-mvp)
-Overall: ~55% complete
+Overall: ~65% complete
 
 Documentation: OK
 PRD in docs/PRD.md; docs/env.example and docs/env.cloud.example present
-README has "How to run locally" + ENV; deploy-to-Vercel still not documented
+README has "How to run locally" + ENV + deploy-to-Vercel/ENV.cloud section
 
 Login (Auth): PARTIAL
-Supabase Cloud configured; middleware + login/register/logout pages OK
-RBAC (user/admin) wiring in API, but roles/plans in UI still minimal
+Supabase Cloud configured; middleware + login/register/logout + reset hasła OK
+RBAC (user/admin) działa w API (profiles.role), UI ról nadal minimalny
 
 Tests: PARTIAL
 Smoke script exists and passes (npm run smoke)
-Playwright E2E not added yet
+Playwright E2E baseline added (/, /auth/login, /api/health) i odpalany w CI
 
 Business Logic: PARTIAL
-Assets CRUD (admin) implemented over Supabase; signals/mock strategy still TODO
+Assets CRUD (admin) implemented over Supabase
+Mock signals engine + POST /api/admin/generate-signals + dashboard list for XAUUSD gotowe
 
 CI/CD: PARTIAL
-GitHub Actions present: lint + build + smoke + Supabase Cloud migrations
-Vercel deployment for main branch works; no Vercel Cron yet
+GitHub Actions: lint + build + smoke + test:e2e + Supabase Cloud migrations
+Vercel deployment for main branch works (prod), previews dla PR dostępne
 
 Database: PARTIAL
 Schema and types OK (profiles, assets, strategies, signals) with RLS policies
@@ -81,24 +82,26 @@ Migrations pushed to Supabase Cloud; seeding admin profile / plans still open
 
 API (Etap 1): PARTIAL
 GET /api/health OK
-/api/assets list + by id + admin CRUD implemented; signals + generate-signals missing
+/api/assets list + by id + admin CRUD implemented
+GET /api/signals i POST /api/admin/generate-signals (mock strategy) działają
 
 Source tool: manual check in Cursor using 10x-mvp-tracker guidelines
 
 Next 5 quick wins
-Document deploy-to-Vercel and ENV.cloud in README
-Implement GET /api/signals and simple list view on dashboard
-Seed XAUUSD + admin user in Supabase (SQL or migration) and confirm RLS
-Add GitHub Action step for Playwright baseline test (/, /auth/login, /api/health)
-Start mock signals engine + POST /api/admin/generate-signals (no SSE yet)
+Seed XAUUSD + admin user + e2e testy kont (E2E_USER/E2E_ADMIN) i potwierdzenie RLS
+Proste UI Assets (admin): lista + formularz create/edit/delete
+Rozszerzyć E2E o CRUD assets i generate-signals
+Zrefaktoryzować dashboard (wydzielenie komponentów, przygotowanie pod wykres XAUUSD)
+Przygotować szkic pod Vercel Cron /api/admin/generate-signals (bez włączania w MVP)
 ```
 
 ### Historia raportów
 
-| Data       | Ukończenie | Najważniejsze rekomendacje                                                                 |
-| ---------- | ---------- | ------------------------------------------------------------------------------------------ |
-| 2025-11-05 | ~35%       | README run guide; assets by id; seed XAUUSD/RLS; CI smoke; Playwright baseline             |
-| 2025-11-29 | ~55%       | CI + Supabase Cloud migrations; Vercel deploy; assets CRUD over Supabase; env.cloud wiring |
+| Data       | Ukończenie | Najważniejsze rekomendacje                                                                                     |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
+| 2025-11-05 | ~35%       | README run guide; assets by id; seed XAUUSD/RLS; CI smoke; Playwright baseline                                 |
+| 2025-11-29 | ~55%       | CI + Supabase Cloud migrations; Vercel deploy; assets CRUD over Supabase; env.cloud wiring                     |
+| 2025-11-30 | ~65%       | Signals mock engine + dashboard list; GET /api/signals + POST /api/admin/generate-signals; Playwright E2E w CI |
 
 ### Notatki i decyzje
 
