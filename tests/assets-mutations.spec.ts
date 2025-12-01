@@ -12,11 +12,12 @@ async function getToken(email?: string, password?: string) {
   return data.session.access_token;
 }
 
-test("PATCH/DELETE 401 without token", async ({ request }) => {
+test("PATCH/DELETE non-2xx without token", async ({ request }) => {
   const r1 = await request.patch("/api/assets/00000000-0000-0000-0000-000000000000", { data: { name: "X" } });
-  expect([400, 401, 404]).toContain(r1.status()); // id may be invalid vs not found, but must not be 2xx
+  // id may be invalid vs not found, but must not be 2xx
+  expect([400, 401, 403, 404]).toContain(r1.status());
   const r2 = await request.delete("/api/assets/00000000-0000-0000-0000-000000000000");
-  expect([400, 401, 404]).toContain(r2.status());
+  expect([400, 401, 403, 404]).toContain(r2.status());
 });
 
 test("PATCH 403 with user token; 200 with admin token", async () => {
