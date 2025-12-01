@@ -1,40 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Welcome from "../components/Welcome.astro";
-import SignalsList from "../components/SignalsList.astro";
-import type { Database } from "../db/database.types";
-import { supabaseClient } from "../db/supabase.client";
+import { SignalsDashboardClient } from "../components/SignalsDashboardClient";
 ---
 
-<Layout>
-  <Welcome />
-  {
-    // Prosty SSR: pobranie ostatnich sygnałów XAUUSD z Supabase Cloud
-  }
-  {
-    await (async () => {
-      try {
-        const assetResult = await supabaseClient.from("assets").select("id").eq("symbol", "XAUUSD").maybeSingle();
-        const asset = assetResult.data as { id: string } | null;
-
-        let signals: Database["public"]["Tables"]["signals"]["Row"][] = [];
-
-        if (asset?.id) {
-          const result = await supabaseClient
-            .from("signals")
-            .select("*")
-            .eq("asset_id", asset.id)
-            .order("ts", { ascending: false })
-            .limit(20);
-
-          signals = (result.data as Database["public"]["Tables"]["signals"]["Row"][]) ?? [];
-        }
-
-        return <SignalsList signals={signals} />;
-      } catch (e) {
-        console.error("Failed to load signals for dashboard", e);
-        return null;
-      }
-    })()
-  }
+<Layout title="Dashboard – XAUUSD i sygnały">
+  <main class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+    <header class="space-y-2">
+      <h1 class="text-3xl font-semibold text-slate-900">Dashboard – XAUUSD i sygnały</h1>
+      <p class="text-sm text-slate-600">
+        Mockowe sygnały tradingowe generowane w Supabase. Nie stanowią rekomendacji inwestycyjnej.
+      </p>
+    </header>
+    <SignalsDashboardClient client:load />
+  </main>
 </Layout>
