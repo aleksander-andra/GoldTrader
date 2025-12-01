@@ -3,12 +3,15 @@ import { getSupabaseBrowser } from "../lib/auth/browserClient";
 import type { Database } from "../db/database.types";
 
 type SignalRow = Database["public"]["Tables"]["signals"]["Row"];
+type SignalWithStrategy = SignalRow & {
+  strategies?: { name?: string | null } | null;
+};
 
 type State =
   | { status: "loading" }
   | { status: "anon" }
   | { status: "error"; message: string }
-  | { status: "ready"; signals: SignalRow[] };
+  | { status: "ready"; signals: SignalWithStrategy[] };
 
 export function SignalsDashboardClient() {
   const [state, setState] = React.useState<State>({ status: "loading" });
@@ -27,28 +30,37 @@ export function SignalsDashboardClient() {
         return;
       }
 
-      const { data: asset, error: assetError } = await supabase
+      const { data: assetRow, error: assetError } = (await supabase
         .from("assets")
         .select("id")
         .eq("symbol", "XAUUSD")
-        .maybeSingle();
+        .maybeSingle()) as unknown as {
+        data: { id: string } | null;
+        error: { message: string } | null;
+      };
 
       if (assetError) {
         setState({ status: "error", message: assetError.message });
         return;
       }
 
-      if (!asset) {
+      if (!assetRow) {
         setState({ status: "error", message: "Aktywo XAUUSD nie istnieje w bazie." });
         return;
       }
+      const assetId = assetRow.id;
 
-      const { data: signals, error: signalsError } = await supabase
+      const { data: signalsRaw, error: signalsError } = (await supabase
         .from("signals")
-        .select("*")
-        .eq("asset_id", asset.id)
+        .select("id, ts, type, confidence, asset_id, strategy_id, strategies(name)")
+        .eq("asset_id", assetId)
         .order("ts", { ascending: false })
-        .limit(20);
+        .limit(20)) as unknown as {
+        data: SignalWithStrategy[] | null;
+        error: { message: string } | null;
+      };
+
+      const signals = signalsRaw ?? null;
 
       if (signalsError) {
         setState({ status: "error", message: signalsError.message });
@@ -57,7 +69,7 @@ export function SignalsDashboardClient() {
 
       setState({
         status: "ready",
-        signals: (signals as SignalRow[]) ?? [],
+        signals: (signals as SignalWithStrategy[]) ?? [],
       });
     })().catch((e: unknown) => {
       const message = e instanceof Error ? e.message : "Unknown error";
@@ -113,27 +125,30 @@ export function SignalsDashboardClient() {
               </tr>
             </thead>
             <tbody>
-              {signals.map((s) => (
-                <tr key={s.id} className="border-b last:border-0 border-slate-100 hover:bg-slate-50/80">
-                  <td className="py-2 pr-4 font-mono text-xs text-slate-700">{new Date(s.ts).toISOString()}</td>
-                  <td className="py-2 pr-4">
-                    <span
-                      className={[
-                        "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold",
-                        s.type === "BUY" && "bg-emerald-50 text-emerald-700 border border-emerald-300",
-                        s.type === "SELL" && "bg-rose-50 text-rose-700 border border-rose-300",
-                        s.type === "HOLD" && "bg-slate-50 text-slate-700 border border-slate-300",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      {s.type}
-                    </span>
-                  </td>
-                  <td className="py-2 pr-4 text-slate-800">{s.confidence}%</td>
-                  <td className="py-2 pr-4 text-xs font-mono text-slate-600">{s.strategy_id}</td>
-                </tr>
-              ))}
+              {signals.map((s) => {
+                const strategyName = s.strategies?.name ?? s.strategy_id;
+                return (
+                  <tr key={s.id} className="border-b last:border-0 border-slate-100 hover:bg-slate-50/80">
+                    <td className="py-2 pr-4 font-mono text-xs text-slate-700">{new Date(s.ts).toISOString()}</td>
+                    <td className="py-2 pr-4">
+                      <span
+                        className={[
+                          "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold",
+                          s.type === "BUY" && "bg-emerald-50 text-emerald-700 border border-emerald-300",
+                          s.type === "SELL" && "bg-rose-50 text-rose-700 border border-rose-300",
+                          s.type === "HOLD" && "bg-slate-50 text-slate-700 border border-slate-300",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        {s.type}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-4 text-slate-800">{s.confidence}%</td>
+                    <td className="py-2 pr-4 text-xs font-mono text-slate-600">{strategyName}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
