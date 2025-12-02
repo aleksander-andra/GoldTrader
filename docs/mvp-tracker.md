@@ -17,12 +17,12 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
   - [ ] RBAC (user/admin) — bez planów taryfowych w Etapie 1
 
 - [ ] Testy
-  - [ ] Playwright E2E: login ±, dashboard (chart + sygnały), CRUD assets (admin), generate‑signals
+  - [ ] Playwright E2E: login ±, dashboard (chart + sygnały), CRUD assets (admin), generate‑signals — login + health + dashboard sygnałów + CRUD/generate‑signals po API działają, test UI CRUD assets admin **tymczasowo `skip`** (patrz `docs/e2e-admin-admin-assets-ui.md`)
   - [ ] (opcjonalnie) testy kontraktowe API
 
 - [ ] Logika biznesowa
   - [x] Mock silnik sygnałów + top‑K/dzień
-  - [ ] Assets: CRUD (admin)
+  - [x] Assets: CRUD (admin)
   - [ ] (Po MVP) Adapter providerów danych i forecasts
 
 - [ ] CI/CD
@@ -47,7 +47,7 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 ### Widoki (dla szybkiego przeglądu postępu UI)
 
 - [ ] Dashboard: wykres XAUUSD (pull) + lista sygnałów
-- [ ] Assets (admin): lista + formularz (create/edit/delete)
+- [x] Assets (admin): lista + formularz (create/edit/delete) — działa; E2E UI test admina tymczasowo `skip` (szczegóły w `docs/e2e-admin-admin-assets-ui.md`)
 - [ ] (Po MVP) Admin panel: providerzy/ plany; LLM czat; overlay forecast; SSE live
 
 ### Ostatni raport (wklej tutaj wynik z „check-mvp”)
