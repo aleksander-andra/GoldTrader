@@ -141,7 +141,12 @@ export function SignalsDashboardClient() {
           </div>
         </div>
       </div>
-      <h2 className="text-xl font-semibold mb-4 text-slate-900">Ostatnie sygnały (mock)</h2>
+      <div className="flex items-baseline justify-between mb-3">
+        <h2 className="text-xl font-semibold text-slate-900">Ostatnie sygnały XAUUSD (mock)</h2>
+        <p className="text-xs text-slate-500">
+          Dane demonstracyjne • {signals.length > 0 ? `${signals.length} ostatnich sygnałów` : "brak sygnałów"}
+        </p>
+      </div>
       {signals.length === 0 ? (
         <p className="text-sm text-slate-600">
           Brak sygnałów. Jako admin wywołaj endpoint <code>/api/admin/generate-signals</code>, aby wygenerować dane
@@ -149,13 +154,13 @@ export function SignalsDashboardClient() {
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
+          <table className="min-w-full text-sm border-collapse">
             <thead className="bg-slate-50">
-              <tr className="border-b border-slate-200 text-left">
-                <th className="py-2 pr-4">Czas (UTC)</th>
-                <th className="py-2 pr-4">Typ</th>
-                <th className="py-2 pr-4">Pewność</th>
-                <th className="py-2 pr-4">Strategia</th>
+              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+                <th className="py-2 pr-4 font-semibold">Czas (UTC)</th>
+                <th className="py-2 pr-4 font-semibold">Typ</th>
+                <th className="py-2 pr-4 font-semibold text-right">Pewność</th>
+                <th className="py-2 pr-4 font-semibold">Strategia</th>
               </tr>
             </thead>
             <tbody>
