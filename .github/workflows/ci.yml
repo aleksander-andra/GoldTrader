@@ -56,8 +56,11 @@ jobs:
           curl -fsS http://localhost:4321/auth/login > /dev/null
           curl -fsS http://localhost:4321/auth/register > /dev/null
 
-      - name: Install Playwright browsers
-        run: npx --yes playwright install --with-deps chromium
+      - name: Install Playwright (with caching)
+        uses: microsoft/playwright-github-action@v1
+        with:
+          with-deps: true
+          browsers: chromium
 
       - name: E2E tests (Playwright)
         run: npm run test:e2e
