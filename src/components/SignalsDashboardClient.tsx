@@ -107,6 +107,40 @@ export function SignalsDashboardClient() {
 
   return (
     <section className="mt-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      <div className="mb-6">
+        <div className="flex items-baseline justify-between mb-2">
+          <h2 className="text-lg font-semibold text-slate-900">XAUUSD — podgląd wykresu (placeholder)</h2>
+          <p className="text-[11px] uppercase tracking-wide text-slate-400">Mock • brak realnych danych rynkowych</p>
+        </div>
+        <div className="relative h-40 w-full rounded-xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
+          <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_top,_#e2e8f0,_transparent_55%),radial-gradient(circle_at_bottom,_#cbd5f5,_transparent_55%)]" />
+          <svg viewBox="0 0 100 40" className="absolute inset-0 h-full w-full text-emerald-500">
+            <defs>
+              <linearGradient id="xauusd-area" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="rgba(16,185,129,0.35)" />
+                <stop offset="100%" stopColor="rgba(16,185,129,0)" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0 30 L5 32 L15 24 L25 28 L35 18 L45 20 L55 12 L65 16 L75 10 L85 14 L95 8 L100 10 L100 40 L0 40 Z"
+              fill="url(#xauusd-area)"
+            />
+            <path
+              d="M0 30 L5 32 L15 24 L25 28 L35 18 L45 20 L55 12 L65 16 L75 10 L85 14 L95 8 L100 10"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div className="absolute inset-x-4 bottom-2 flex justify-between text-[10px] text-slate-400">
+            <span>T-20</span>
+            <span>T-10</span>
+            <span>Teraz</span>
+          </div>
+        </div>
+      </div>
       <h2 className="text-xl font-semibold mb-4 text-slate-900">Ostatnie sygnały (mock)</h2>
       {signals.length === 0 ? (
         <p className="text-sm text-slate-600">
