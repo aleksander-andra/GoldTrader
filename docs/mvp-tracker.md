@@ -89,6 +89,7 @@ Source tool: manual check in Cursor using 10x-mvp-tracker guidelines
 
 Next 5 quick wins
 Seed XAUUSD + admin user + e2e testy kont (E2E_USER/E2E_ADMIN) i potwierdzenie RLS
+→ XAUUSD seed zrobiony migracją `20251111_seed_core_data.sql`; admin user tworzony ręcznie w Supabase Cloud (profil z `role='admin'`), RLS weryfikowany przez testy `assets-admin.spec.ts` / `assets-mutations.spec.ts` (token admina vs user/anon)
 Proste UI Assets (admin): lista + formularz create/edit/delete
 Rozszerzyć E2E o CRUD assets i generate-signals
 Zrefaktoryzować dashboard (wydzielenie komponentów, przygotowanie pod wykres XAUUSD)
