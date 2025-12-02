@@ -8,9 +8,18 @@ export function LoginForm() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [info, setInfo] = React.useState<string | null>(null);
+  const [hydrated, setHydrated] = React.useState(false);
+
+  React.useEffect(() => {
+    setHydrated(true);
+    // eslint-disable-next-line no-console
+    console.log("LoginForm hydrated");
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // eslint-disable-next-line no-console
+    console.log("LoginForm onSubmit fired", { email });
     setError(null);
     setInfo(null);
     setLoading(true);
@@ -24,6 +33,8 @@ export function LoginForm() {
     setLoading(false);
     if (error) {
       setError(error.message);
+      // eslint-disable-next-line no-console
+      console.error("Login error", error.message);
       return;
     }
     window.location.assign("/");
@@ -57,7 +68,12 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="max-w-sm mx-auto space-y-3">
+    <form
+      data-testid="login-form"
+      data-hydrated={hydrated ? "true" : "false"}
+      onSubmit={onSubmit}
+      className="max-w-sm mx-auto space-y-3"
+    >
       <input
         type="email"
         placeholder="Email"

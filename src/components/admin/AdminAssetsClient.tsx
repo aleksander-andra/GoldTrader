@@ -30,7 +30,9 @@ export function AdminAssetsClient() {
       setState({ status: "error", message: "Brak konfiguracji Supabase w przeglądarce." });
       return null;
     }
+    console.log("withAuth supabase?", !!supabase);
     const { data, error } = await supabase.auth.getSession();
+    console.log("session", !!data?.session, error?.message);
     if (error || !data?.session) {
       setState({ status: "not_logged_in" });
       return null;
