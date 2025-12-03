@@ -208,8 +208,10 @@ Please follow the AI guidelines and coding practices defined in the AI configura
 
 ## Project Docs
 
-- Product Requirements Document (PRD): ./.ai/PRD.md
-- Environment variables example: ./docs/env.example
+- Product Requirements Document (PRD): `./docs/PRD.md`
+- Environment variables example: `./docs/env.example`
+- MVP tracker: `./docs/mvp-tracker.md`
+- API summary (MVP): `./docs/api.md`
 
 ## Rules & Docs
 
