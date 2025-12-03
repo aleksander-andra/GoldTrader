@@ -20,7 +20,7 @@ type State =
   | { status: "loading" }
   | { status: "anon" }
   | { status: "error"; message: string }
-  | { status: "ready"; signals: SignalWithStrategy[]; prices: PricePoint[] };
+  | { status: "ready"; signals: SignalWithStrategy[]; prices: PricePoint[]; forecast: PricePoint[] };
 
 export function SignalsDashboardClient() {
   const [state, setState] = React.useState<State>({ status: "loading" });
@@ -76,7 +76,7 @@ export function SignalsDashboardClient() {
         return;
       }
 
-      // 3) Pobierz mockowane dane cenowe z /api/prices
+      // 3) Pobierz dane cenowe z /api/prices
       let prices: PricePoint[] = [];
       try {
         const res = await fetch("/api/prices?symbol=XAUUSD&range=1d");
@@ -92,10 +92,32 @@ export function SignalsDashboardClient() {
         return;
       }
 
+      // 4) Prosta prognoza: ekstrapolacja trendu z dwóch ostatnich punktów
+      const forecast: PricePoint[] = [];
+      if (prices.length >= 2) {
+        const last = prices[prices.length - 1];
+        const prev = prices[prices.length - 2];
+        const stepMs = last.t - prev.t || 60 * 60 * 1000;
+        const slope = last.c - prev.c;
+        const stepsForecast = 12;
+        for (let i = 1; i <= stepsForecast; i += 1) {
+          const t = last.t + i * stepMs;
+          const c = last.c + slope * i;
+          forecast.push({
+            t,
+            o: c,
+            h: c,
+            l: c,
+            c,
+          });
+        }
+      }
+
       setState({
         status: "ready",
         signals: (signals as SignalWithStrategy[]) ?? [],
         prices,
+        forecast,
       });
     })().catch((e: unknown) => {
       const message = e instanceof Error ? e.message : "Unknown error";
@@ -129,7 +151,7 @@ export function SignalsDashboardClient() {
     );
   }
 
-  const { signals, prices } = state;
+  const { signals, prices, forecast } = state;
 
   const lastCandle = prices[prices.length - 1] ?? null;
   const lastPrice = lastCandle?.c ?? null;
@@ -159,7 +181,10 @@ export function SignalsDashboardClient() {
               Brak danych cenowych (mock)
             </div>
           ) : (
-            <XauusdChartClient prices={prices} />
+            <XauusdChartClient
+              prices={prices.map((p) => ({ t: p.t, c: p.c }))}
+              forecast={forecast.map((p) => ({ t: p.t, c: p.c }))}
+            />
           )}
         </div>
       </div>

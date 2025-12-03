@@ -8,12 +8,14 @@ interface PricePoint {
 
 interface Props {
   prices: PricePoint[];
+  forecast?: PricePoint[];
 }
 
-export function XauusdChartClient({ prices }: Props) {
+export function XauusdChartClient({ prices, forecast }: Props) {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const chartRef = React.useRef<IChartApi | null>(null);
   const seriesRef = React.useRef<ISeriesApi<"Area"> | null>(null);
+  const forecastSeriesRef = React.useRef<ISeriesApi<"Line"> | null>(null);
 
   React.useEffect(() => {
     const container = containerRef.current;
@@ -47,8 +49,14 @@ export function XauusdChartClient({ prices }: Props) {
       lineWidth: 2,
     });
 
+    const forecastSeries = chart.addLineSeries({
+      color: "#6366f1",
+      lineWidth: 2,
+    });
+
     chartRef.current = chart;
     seriesRef.current = series;
+    forecastSeriesRef.current = forecastSeries;
 
     const handleResize = () => {
       if (!container) return;
@@ -62,6 +70,7 @@ export function XauusdChartClient({ prices }: Props) {
       chart.remove();
       chartRef.current = null;
       seriesRef.current = null;
+      forecastSeriesRef.current = null;
     };
   }, []);
 
@@ -74,7 +83,18 @@ export function XauusdChartClient({ prices }: Props) {
     }));
 
     seriesRef.current.setData(data);
+
+    if (forecastSeriesRef.current && forecast && forecast.length > 0) {
+      const forecastData = forecast.map((p) => ({
+        time: (p.t / 1000) as Time,
+        value: p.c,
+      }));
+      forecastSeriesRef.current.setData(forecastData);
+    } else if (forecastSeriesRef.current) {
+      forecastSeriesRef.current.setData([]);
+    }
+
     chartRef.current?.timeScale().fitContent();
-  }, [prices]);
+  }, [prices, forecast]);
   return <div ref={containerRef} className="h-full w-full" />;
 }
