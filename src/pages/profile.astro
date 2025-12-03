@@ -1,0 +1,20 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ProfileClient } from "../components/auth/ProfileClient";
+
+const title = "Profil użytkownika";
+---
+
+<Layout title={title}>
+  <main class="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      <h1 class="text-2xl font-semibold text-slate-900 mb-2">Profil użytkownika</h1>
+      <p class="text-sm text-slate-600 mb-4">
+        Podstawowe informacje o Twoim koncie w Supabase. Rola jest używana do nadawania uprawnień (np. panel
+        administratora do zarządzania aktywami).
+      </p>
+
+      <ProfileClient client:load />
+    </section>
+  </main>
+</Layout>

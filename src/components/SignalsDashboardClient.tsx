@@ -7,11 +7,19 @@ type SignalWithStrategy = SignalRow & {
   strategies?: { name?: string | null } | null;
 };
 
+interface PricePoint {
+  t: number;
+  o: number;
+  h: number;
+  l: number;
+  c: number;
+}
+
 type State =
   | { status: "loading" }
   | { status: "anon" }
   | { status: "error"; message: string }
-  | { status: "ready"; signals: SignalWithStrategy[] };
+  | { status: "ready"; signals: SignalWithStrategy[]; prices: PricePoint[] };
 
 export function SignalsDashboardClient() {
   const [state, setState] = React.useState<State>({ status: "loading" });
@@ -67,9 +75,26 @@ export function SignalsDashboardClient() {
         return;
       }
 
+      // 3) Pobierz mockowane dane cenowe z /api/prices
+      let prices: PricePoint[] = [];
+      try {
+        const res = await fetch("/api/prices?symbol=XAUUSD&range=1d");
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({}))) as { error?: string };
+          throw new Error(body.error || `Błąd ładowania cen (${res.status})`);
+        }
+        const json = (await res.json()) as { candles?: PricePoint[] };
+        prices = json.candles ?? [];
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Nie udało się pobrać danych cenowych.";
+        setState({ status: "error", message });
+        return;
+      }
+
       setState({
         status: "ready",
         signals: (signals as SignalWithStrategy[]) ?? [],
+        prices,
       });
     })().catch((e: unknown) => {
       const message = e instanceof Error ? e.message : "Unknown error";
@@ -103,40 +128,63 @@ export function SignalsDashboardClient() {
     );
   }
 
-  const { signals } = state;
+  const { signals, prices } = state;
 
   return (
     <section className="mt-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
       <div className="mb-6">
         <div className="flex items-baseline justify-between mb-2">
-          <h2 className="text-lg font-semibold text-slate-900">XAUUSD — podgląd wykresu (placeholder)</h2>
-          <p className="text-[11px] uppercase tracking-wide text-slate-400">Mock • brak realnych danych rynkowych</p>
+          <h2 className="text-lg font-semibold text-slate-900">XAUUSD — podgląd wykresu (mock z /api/prices)</h2>
+          <p className="text-[11px] uppercase tracking-wide text-slate-400">Mock • dane OHLC z endpointu /api/prices</p>
         </div>
         <div className="relative h-40 w-full rounded-xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
-          <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_top,_#e2e8f0,_transparent_55%),radial-gradient(circle_at_bottom,_#cbd5f5,_transparent_55%)]" />
-          <svg viewBox="0 0 100 40" className="absolute inset-0 h-full w-full text-emerald-500">
-            <defs>
-              <linearGradient id="xauusd-area" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="rgba(16,185,129,0.35)" />
-                <stop offset="100%" stopColor="rgba(16,185,129,0)" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M0 30 L5 32 L15 24 L25 28 L35 18 L45 20 L55 12 L65 16 L75 10 L85 14 L95 8 L100 10 L100 40 L0 40 Z"
-              fill="url(#xauusd-area)"
-            />
-            <path
-              d="M0 30 L5 32 L15 24 L25 28 L35 18 L45 20 L55 12 L65 16 L75 10 L85 14 L95 8 L100 10"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {prices.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-400">
+              Brak danych cenowych (mock)
+            </div>
+          ) : (
+            <svg viewBox="0 0 100 40" className="absolute inset-0 h-full w-full text-emerald-500">
+              <defs>
+                <linearGradient id="xauusd-area" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(16,185,129,0.35)" />
+                  <stop offset="100%" stopColor="rgba(16,185,129,0)" />
+                </linearGradient>
+              </defs>
+              {(() => {
+                const closes = prices.map((p) => p.c);
+                const min = Math.min(...closes);
+                const max = Math.max(...closes);
+                const span = max - min || 1;
+                const toPoint = (p: PricePoint, idx: number) => {
+                  const x = (idx / Math.max(prices.length - 1, 1)) * 100;
+                  const y = 5 + (1 - (p.c - min) / span) * 30;
+                  return { x, y };
+                };
+                const pts = prices.map(toPoint);
+                const areaPath =
+                  `M${pts[0].x} 40 ` +
+                  pts.map((pt) => `L${pt.x} ${pt.y}`).join(" ") +
+                  ` L${pts[pts.length - 1].x} 40 Z`;
+                const linePath = pts.map((pt, i) => `${i === 0 ? "M" : "L"}${pt.x} ${pt.y}`).join(" ");
+                return (
+                  <>
+                    <path d={areaPath} fill="url(#xauusd-area)" />
+                    <path
+                      d={linePath}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </>
+                );
+              })()}
+            </svg>
+          )}
           <div className="absolute inset-x-4 bottom-2 flex justify-between text-[10px] text-slate-400">
-            <span>T-20</span>
-            <span>T-10</span>
+            <span>Start</span>
+            <span>Środek</span>
             <span>Teraz</span>
           </div>
         </div>
