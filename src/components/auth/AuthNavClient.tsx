@@ -34,9 +34,14 @@ export function AuthNavClient() {
         </>
       )}
       {hasUser === true && (
-        <a href="/auth/logout" id="link-logout" className="text-blue-600 hover:underline">
-          Wyloguj
-        </a>
+        <>
+          <a href="/profile" id="link-profile" className="text-blue-600 hover:underline">
+            Profil
+          </a>
+          <a href="/auth/logout" id="link-logout" className="text-blue-600 hover:underline">
+            Wyloguj
+          </a>
+        </>
       )}
     </>
   );
