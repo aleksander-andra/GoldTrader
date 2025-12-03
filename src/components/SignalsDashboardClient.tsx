@@ -1,6 +1,7 @@
 import React from "react";
 import { getSupabaseBrowser } from "../lib/auth/browserClient";
 import type { Database } from "../db/database.types";
+import { XauusdChartClient } from "./XauusdChartClient";
 
 type SignalRow = Database["public"]["Tables"]["signals"]["Row"];
 type SignalWithStrategy = SignalRow & {
@@ -19,7 +20,7 @@ type State =
   | { status: "loading" }
   | { status: "anon" }
   | { status: "error"; message: string }
-  | { status: "ready"; signals: SignalWithStrategy[]; prices: PricePoint[] };
+  | { status: "ready"; signals: SignalWithStrategy[]; prices: PricePoint[]; forecast: PricePoint[] };
 
 export function SignalsDashboardClient() {
   const [state, setState] = React.useState<State>({ status: "loading" });
@@ -75,7 +76,7 @@ export function SignalsDashboardClient() {
         return;
       }
 
-      // 3) Pobierz mockowane dane cenowe z /api/prices
+      // 3) Pobierz dane cenowe z /api/prices
       let prices: PricePoint[] = [];
       try {
         const res = await fetch("/api/prices?symbol=XAUUSD&range=1d");
@@ -91,10 +92,32 @@ export function SignalsDashboardClient() {
         return;
       }
 
+      // 4) Prosta prognoza: ekstrapolacja trendu z dwóch ostatnich punktów
+      const forecast: PricePoint[] = [];
+      if (prices.length >= 2) {
+        const last = prices[prices.length - 1];
+        const prev = prices[prices.length - 2];
+        const stepMs = last.t - prev.t || 60 * 60 * 1000;
+        const slope = last.c - prev.c;
+        const stepsForecast = 12;
+        for (let i = 1; i <= stepsForecast; i += 1) {
+          const t = last.t + i * stepMs;
+          const c = last.c + slope * i;
+          forecast.push({
+            t,
+            o: c,
+            h: c,
+            l: c,
+            c,
+          });
+        }
+      }
+
       setState({
         status: "ready",
         signals: (signals as SignalWithStrategy[]) ?? [],
         prices,
+        forecast,
       });
     })().catch((e: unknown) => {
       const message = e instanceof Error ? e.message : "Unknown error";
@@ -128,65 +151,41 @@ export function SignalsDashboardClient() {
     );
   }
 
-  const { signals, prices } = state;
+  const { signals, prices, forecast } = state;
+
+  const lastCandle = prices[prices.length - 1] ?? null;
+  const lastPrice = lastCandle?.c ?? null;
+  const lastTs = lastCandle ? new Date(lastCandle.t) : null;
+
+  const formatIsoUtc = (d: Date | null) => (d ? d.toISOString().replace("T", " ").replace("Z", " UTC") : "");
 
   return (
     <section className="mt-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
       <div className="mb-6">
-        <div className="flex items-baseline justify-between mb-2">
-          <h2 className="text-lg font-semibold text-slate-900">XAUUSD — podgląd wykresu (mock z /api/prices)</h2>
-          <p className="text-[11px] uppercase tracking-wide text-slate-400">Mock • dane OHLC z endpointu /api/prices</p>
+        <div className="flex items-baseline justify-between mb-1">
+          <h2 className="text-lg font-semibold text-slate-900">XAUUSD — podgląd wykresu</h2>
+          {lastPrice !== null && (
+            <p className="text-xs text-slate-600 font-mono">
+              Ostatnia cena: <span className="font-semibold text-slate-900">{lastPrice.toFixed(2)} USD/toz</span>{" "}
+              <span className="text-slate-400">({formatIsoUtc(lastTs)})</span>
+            </p>
+          )}
         </div>
-        <div className="relative h-40 w-full rounded-xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
+        <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
+          {/* Wersja uproszczona: w opisie zaznaczamy, że wykres jest mockowany na bazie bieżącej ceny */}
+          Realna cena z Metals.dev (jeśli skonfigurowano METALS_API_KEY) + gładki, deterministyczny przebieg
+        </p>
+        <div className="relative h-56 w-full rounded-xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
           {prices.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-400">
               Brak danych cenowych (mock)
             </div>
           ) : (
-            <svg viewBox="0 0 100 40" className="absolute inset-0 h-full w-full text-emerald-500">
-              <defs>
-                <linearGradient id="xauusd-area" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="rgba(16,185,129,0.35)" />
-                  <stop offset="100%" stopColor="rgba(16,185,129,0)" />
-                </linearGradient>
-              </defs>
-              {(() => {
-                const closes = prices.map((p) => p.c);
-                const min = Math.min(...closes);
-                const max = Math.max(...closes);
-                const span = max - min || 1;
-                const toPoint = (p: PricePoint, idx: number) => {
-                  const x = (idx / Math.max(prices.length - 1, 1)) * 100;
-                  const y = 5 + (1 - (p.c - min) / span) * 30;
-                  return { x, y };
-                };
-                const pts = prices.map(toPoint);
-                const areaPath =
-                  `M${pts[0].x} 40 ` +
-                  pts.map((pt) => `L${pt.x} ${pt.y}`).join(" ") +
-                  ` L${pts[pts.length - 1].x} 40 Z`;
-                const linePath = pts.map((pt, i) => `${i === 0 ? "M" : "L"}${pt.x} ${pt.y}`).join(" ");
-                return (
-                  <>
-                    <path d={areaPath} fill="url(#xauusd-area)" />
-                    <path
-                      d={linePath}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </>
-                );
-              })()}
-            </svg>
+            <XauusdChartClient
+              prices={prices.map((p) => ({ t: p.t, c: p.c }))}
+              forecast={forecast.map((p) => ({ t: p.t, c: p.c }))}
+            />
           )}
-          <div className="absolute inset-x-4 bottom-2 flex justify-between text-[10px] text-slate-400">
-            <span>Start</span>
-            <span>Środek</span>
-            <span>Teraz</span>
-          </div>
         </div>
       </div>
       <div className="flex items-baseline justify-between mb-3">
