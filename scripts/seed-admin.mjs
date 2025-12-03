@@ -1,3 +1,5 @@
+/* eslint-env node */
+/* eslint-disable no-console */
 import { createClient } from "@supabase/supabase-js";
 import { config as loadEnv } from "dotenv";
 import { existsSync } from "node:fs";
@@ -14,13 +16,11 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
 
 if (!url || !serviceKey) {
-  // eslint-disable-next-line no-console
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment.");
   process.exit(1);
 }
 
 if (!adminEmail) {
-  // eslint-disable-next-line no-console
   console.error("Missing E2E_ADMIN_EMAIL in environment.");
   process.exit(1);
 }
@@ -40,14 +40,12 @@ async function main() {
   });
 
   if (usersError) {
-    // eslint-disable-next-line no-console
     console.error("Failed to list users:", usersError.message);
     process.exit(1);
   }
 
   const user = users?.users?.[0];
   if (!user) {
-    // eslint-disable-next-line no-console
     console.error(
       `No Supabase auth user found for ${adminEmail}. Create the user via app (register) before running this script.`
     );
@@ -68,18 +66,15 @@ async function main() {
     );
 
   if (upsertError) {
-    // eslint-disable-next-line no-console
     console.error("Failed to upsert admin profile:", upsertError.message);
     process.exit(1);
   }
 
-  // eslint-disable-next-line no-console
   console.log(`Profile for ${adminEmail} set to role=admin (user_id=${userId}).`);
   process.exit(0);
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error("Unexpected error in seed-admin script:", err instanceof Error ? err.message : err);
   process.exit(1);
 });
