@@ -1,5 +1,4 @@
-/* eslint-env node */
-/* eslint-disable no-console */
+/* eslint-disable no-undef, no-console */
 import { createClient } from "@supabase/supabase-js";
 import { config as loadEnv } from "dotenv";
 import { existsSync } from "node:fs";
