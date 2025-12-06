@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-undef */
 // Prosty test client do testowania MCP servera
 // Uruchom: node test-client.js
 

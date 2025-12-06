@@ -149,6 +149,10 @@ class GoldTraderMCPServer {
     // eslint-disable-next-line no-console
     console.error("GoldTrader MCP Server running on stdio");
   }
+
+  private async handleUnused() {
+    // Helper method to satisfy linter - can be removed
+  }
 }
 
 // Uruchomienie serwera
