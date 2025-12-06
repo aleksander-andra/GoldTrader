@@ -46,7 +46,7 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 
 ### Widoki (dla szybkiego przeglądu postępu UI)
 
-- [ ] Dashboard: wykres XAUUSD (pull) + lista sygnałów
+- [x] Dashboard: wykres XAUUSD (pull) + lista sygnałów + panel newsów (mock) z AI rekomendacją
 - [x] Assets (admin): lista + formularz (create/edit/delete) — działa; E2E UI test admina tymczasowo `skip` (szczegóły w `docs/e2e-admin-admin-assets-ui.md`)
 - [ ] (Po MVP) Admin panel: providerzy/ plany; LLM czat; overlay forecast; SSE live
 
