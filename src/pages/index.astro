@@ -1,16 +1,25 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { SignalsDashboardClient } from "../components/SignalsDashboardClient";
+import { NewsPanelClient } from "../components/news/NewsPanelClient";
 ---
 
 <Layout title="Dashboard – XAUUSD i sygnały">
-  <main class="max-w-5xl mx-auto px-4 py-8 space-y-6">
-    <header class="space-y-2">
-      <h1 class="text-3xl font-semibold text-slate-900">Dashboard – XAUUSD i sygnały</h1>
-      <p class="text-sm text-slate-600">
-        Mockowe sygnały tradingowe generowane w Supabase. Nie stanowią rekomendacji inwestycyjnej.
-      </p>
-    </header>
-    <SignalsDashboardClient client:load />
+  <main class="flex flex-col gap-6 px-2 py-6 md:px-4 lg:flex-row">
+    <section class="flex-1 space-y-4">
+      <header class="space-y-2">
+        <h1 class="text-3xl font-semibold text-slate-900">Dashboard – XAUUSD i sygnały</h1>
+        <p class="text-sm text-slate-600">
+          Mockowe sygnały tradingowe generowane w Supabase. Nie stanowią rekomendacji inwestycyjnej.
+        </p>
+      </header>
+      <SignalsDashboardClient client:load />
+    </section>
+
+    <section class="lg:w-80 lg:flex-shrink-0">
+      <div class="sticky top-4">
+        <NewsPanelClient client:load />
+      </div>
+    </section>
   </main>
 </Layout>
