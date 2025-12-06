@@ -1,0 +1,38 @@
+---
+description: Strategic debugging and logging guidelines for systematic issue resolution
+globs: *.ts,*.tsx,*.astro,*.js,*.jsx
+alwaysApply: false
+---
+
+## Strategic Debugging Guidelines
+
+### Debugging Process:
+1. **Create action plan** - Define specific investigation questions and success criteria
+2. **Identify target files** - Focus on files likely related to the bug based on symptoms
+3. **Analyze code systematically** - Examine key functions, variables, and data flow
+4. **Add strategic logging** - Place logs that directly answer investigation questions
+5. **Test and iterate** - Run tests, analyze logs, refine logging strategy
+
+### Strategic Logging Best Practices:
+- **Focus on investigation questions** - Each log should help answer specific debugging questions
+- **Log object contents** - Use JSON.stringify() for objects to see full structure
+- **Log at decision points** - Add logs before if statements, loops, and function calls
+- **Include context** - Log relevant variables, function names, and timestamps
+- **Avoid refactoring** - Only add logs, don't change business logic unless absolutely necessary
+
+### Log Placement Strategy:
+- **Function entry/exit** - Log function calls and return values
+- **Data transformations** - Log before/after data processing
+- **API calls** - Log request/response details
+- **State changes** - Log when application state updates
+- **Error boundaries** - Log caught exceptions with full context
+
+### Investigation Questions Framework:
+When debugging, ask:
+- What data is being passed between functions?
+- What are the actual vs expected values?
+- When does the bug occur in the execution flow?
+- What external factors might influence behavior?
+- Are there race conditions or timing issues?
+
+**IMPORTANT:** Add logs systematically, one file at a time. Focus on quality over quantity - each log should provide actionable insight.

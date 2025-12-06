@@ -192,7 +192,20 @@ This project is configured with AI development tools to enhance the development 
 
 ### Cursor IDE
 
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
+The project includes comprehensive AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions. Available rules include:
+
+- **Shared Rules** (`shared.mdc`) - Project overview, tech stack, and coding practices
+- **Frontend Rules** (`frontend.mdc`) - Astro, React, Tailwind, and accessibility guidelines
+- **Backend Rules** (`backend.mdc`) - Supabase, database, and API guidelines
+- **UI Rules** (`ui-shadcn-helper.mdc`) - Shadcn/ui component usage
+- **Code Review** (`code-review.mdc`) - Code quality and security review guidelines
+- **Database Design** (`database-design.mdc`) - PostgreSQL/Supabase schema design
+- **API Design** (`api-design.mdc`) - REST API development standards
+- **UI Planning** (`ui-planning.mdc`) - UI/UX architecture and planning
+- **Project Planning** (`project-planning.mdc`) - PRD creation and project documentation
+- **Debugging** (`debugging.mdc`) - Strategic debugging and logging practices
+- **Onboarding** (`onboarding.mdc`) - Project analysis and onboarding guidelines
+- **MCP Development** (`mcp-development.mdc`) - Model Context Protocol development guidelines
 
 ### GitHub Copilot
 

@@ -1,0 +1,31 @@
+---
+description: Database design and schema guidelines for PostgreSQL/Supabase
+globs: supabase/migrations/*.sql,src/db/*.ts
+alwaysApply: false
+---
+
+## Database Design Guidelines
+
+### Schema Design Principles:
+- Design efficient and scalable PostgreSQL database structures
+- Normalize to appropriate level (typically 3NF, unless denormalization is justified for performance)
+- Use appropriate column names, data types, and constraints
+
+### Table Structure Requirements:
+- Define tables with proper column names and data types
+- Establish primary keys and foreign keys appropriately
+- Add indexes to improve query performance
+- Include necessary constraints (uniqueness, not null, etc.)
+
+### Relationships:
+- Define relationships between tables with proper cardinality (one-to-one, one-to-many, many-to-many)
+- Create junction tables for many-to-many relationships when needed
+
+### Security:
+- Implement Row Level Security (RLS) policies where applicable
+- Ensure proper access controls based on requirements
+
+### Best Practices:
+- Follow PostgreSQL best practices for database design
+- Consider performance implications of design decisions
+- Document design decisions and trade-offs
