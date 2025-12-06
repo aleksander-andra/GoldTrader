@@ -1,0 +1,36 @@
+---
+description: UI/UX planning and architecture guidelines
+globs: src/components/**/*.tsx,src/pages/**/*.astro
+alwaysApply: false
+---
+
+## UI/UX Planning Guidelines
+
+### Architecture Planning:
+- Identify key views and screens based on product requirements
+- Define user flows and navigation between views
+- Consider component reusability and state management
+
+### User Experience:
+- Design intuitive navigation patterns
+- Ensure responsive design across devices
+- Implement proper accessibility features
+- Consider user journey and interaction flows
+
+### Component Design:
+- Plan reusable UI components
+- Define component hierarchy and relationships
+- Consider state management strategies
+- Implement consistent design patterns
+
+### Integration Considerations:
+- Align UI architecture with available API endpoints
+- Plan for data synchronization between frontend and backend
+- Design error states and loading indicators
+- Consider offline functionality where applicable
+
+### Best Practices:
+- Focus on user-centered design principles
+- Ensure accessibility compliance (WCAG guidelines)
+- Plan for scalability and maintainability
+- Document design decisions and user flow rationale

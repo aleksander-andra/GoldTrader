@@ -1,0 +1,33 @@
+---
+description: REST API design and implementation guidelines
+globs: src/pages/api/**/*.ts
+alwaysApply: false
+---
+
+## API Design Guidelines
+
+### REST API Structure:
+- Design clear and consistent REST API endpoints
+- Use proper HTTP methods (GET, POST, PUT, DELETE, PATCH)
+- Implement proper status codes and error responses
+- Include comprehensive API documentation
+
+### Data Transfer:
+- Use DTOs (Data Transfer Objects) for API communication
+- Implement proper input validation using Zod schemas
+- Ensure consistent data formatting across endpoints
+
+### Error Handling:
+- Implement consistent error response format
+- Provide meaningful error messages
+- Handle edge cases and validation failures
+
+### Security & Authentication:
+- Implement proper authentication and authorization
+- Use secure practices for sensitive operations
+- Validate all inputs and sanitize data
+
+### Performance:
+- Consider caching strategies where appropriate
+- Optimize database queries
+- Implement pagination for large datasets

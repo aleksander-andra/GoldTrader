@@ -1,0 +1,61 @@
+---
+description: Model Context Protocol (MCP) development guidelines for building AI tool integrations
+globs: src/**/*.ts,src/**/*.js,*.json
+alwaysApply: false
+---
+
+## MCP Development Guidelines
+
+### MCP Server Planning:
+1. **Identify required tools/resources/prompts** - What specific functionalities should the server provide?
+2. **Define inputs and outputs** - What data is needed and what should be returned?
+3. **Plan data validation** - Use schemas (Zod) for input/output validation
+4. **Determine data sources** - Where will information come from (APIs, databases, files)?
+
+### Key MCP Components:
+- **Tools** - Executable functions that perform actions
+- **Resources** - Data sources that can be read
+- **Prompts** - Reusable prompt templates for AI interactions
+
+### Implementation Considerations:
+- **Framework selection** - Choose appropriate MCP SDK (`@modelcontextprotocol/sdk`)
+- **Response structure** - Ensure compatibility with MCP clients (use `{ content: [...] }` format)
+- **Error handling** - Define clear error communication patterns
+- **Security** - Consider authentication and authorization requirements
+
+### Data Validation with Schemas:
+```typescript
+// Example using Zod for MCP tool parameters
+const ToolParametersSchema = z.object({
+  query: z.string().min(1, "Query cannot be empty"),
+  limit: z.number().min(1).max(100).optional().default(10)
+});
+```
+
+### Response Formatting:
+- **Tool results** - Wrap in `{ content: [{ type: "text", text: "result" }] }`
+- **Error responses** - Provide clear error messages with context
+- **Resource content** - Format appropriately for client consumption
+
+### Testing MCP Servers:
+- **Use MCP Inspector** - `npx @modelcontextprotocol/inspector@latest`
+- **Test all tools** - Verify inputs, outputs, and error cases
+- **Validate schemas** - Ensure proper data validation
+- **Performance testing** - Check response times and resource usage
+
+### Best Practices:
+- **Start with MVP** - Implement minimal viable functionality first
+- **Clear documentation** - Document all tools, resources, and prompts
+- **Version compatibility** - Ensure MCP protocol version compatibility
+- **Scalability** - Consider caching and performance optimization
+- **Monitoring** - Implement logging and error tracking
+
+### Development Workflow:
+1. Plan tools/resources based on requirements
+2. Define input/output schemas
+3. Implement core functionality
+4. Add comprehensive error handling
+5. Test with MCP Inspector
+6. Document and deploy
+
+**NOTE:** MCP enables AI assistants to connect with external tools and data sources, expanding capabilities beyond the local environment.

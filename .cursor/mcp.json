@@ -4,8 +4,12 @@
       "command": "npx",
       "args": ["@przeprogramowani/10x-mvp-tracker"],
       "transport": "stdio"
+    },
+    "goldtrader-financial": {
+      "command": "node",
+      "args": ["mcp-server/dist/index.js"],
+      "cwd": ".",
+      "transport": "stdio"
     }
   }
 }
-
-

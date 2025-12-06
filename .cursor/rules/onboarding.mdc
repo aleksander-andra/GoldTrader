@@ -1,0 +1,52 @@
+---
+description: Project onboarding and analysis guidelines for new developers
+globs: *.md,README.md
+alwaysApply: false
+---
+
+## Project Onboarding Guidelines
+
+### Initial Project Analysis:
+1. **Explore project structure** - Use directory listing to understand organization
+2. **Identify key directories** - Focus on src/, docs/, tests/, config files
+3. **Analyze core modules** - Examine main source code files and components
+4. **Review documentation** - Read README, setup guides, and contribution docs
+5. **Determine tech stack** - Identify languages, frameworks, and tools used
+
+### Core Analysis Steps:
+- **Programming languages & frameworks** - What technologies are used?
+- **Project architecture** - How is the code organized?
+- **Key contributors** - Who are the main developers and their focus areas?
+- **Recent development** - What features are being actively worked on?
+- **Complex areas** - Which parts of the codebase are most challenging?
+
+### Development Environment Setup:
+- **Dependencies** - What packages/libraries are required?
+- **Build process** - How to compile/run the project?
+- **Testing** - What testing frameworks and how to run tests?
+- **Development workflow** - Git flow, code review process, deployment
+
+### Key Questions for New Developers:
+1. What is the project's main purpose and target users?
+2. What are the core business domains/features?
+3. How is the codebase organized (architecture patterns)?
+4. What are the most complex/critical modules?
+5. What development tools and workflows are used?
+6. How to set up the local development environment?
+7. What are the testing and quality assurance practices?
+
+### Helpful Resources to Find:
+- Project documentation and architecture docs
+- API documentation and integration guides
+- Issue trackers and project boards
+- Team communication channels
+- Code review guidelines and standards
+
+### Next Steps for New Developers:
+1. Set up development environment following setup instructions
+2. Read through core module documentation
+3. Run existing tests to ensure environment works
+4. Start with small tasks or bug fixes to learn codebase
+5. Ask questions about unclear areas and complex modules
+
+**TIP:** When analyzing a project, focus on understanding the "why" behind architectural decisions, not just the "what" of the code.

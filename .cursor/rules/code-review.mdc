@@ -1,0 +1,23 @@
+---
+description: Code review guidelines for maintaining code quality and security
+globs: *.ts,*.tsx,*.astro,*.js,*.jsx
+alwaysApply: false
+---
+
+## Code Review Guidelines
+
+### Review Priorities (in order):
+1. **Logic errors and bugs** that may cause system crashes
+2. **Security vulnerabilities** and data protection issues
+3. **Performance problems** that impact user experience
+4. **Maintainability issues** that increase technical debt
+5. **Code style and consistency** with project standards
+
+### Review Process:
+- Analyze code for business logic correctness
+- Check error handling and edge case coverage
+- Verify proper validation and sanitization of inputs
+- Evaluate impact on existing functionality
+- Assess test coverage and quality
+
+**IMPORTANT:** Only report significant issues that require action. Provide specific, actionable improvement suggestions.

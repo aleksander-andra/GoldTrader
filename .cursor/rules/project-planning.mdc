@@ -1,0 +1,42 @@
+---
+description: Project planning and documentation guidelines
+globs: docs/*.md,README.md,*.md
+alwaysApply: false
+---
+
+## Project Planning Guidelines
+
+### Product Requirements Document (PRD):
+- Create comprehensive PRDs with clear sections:
+  - Product overview
+  - User problems
+  - Functional requirements
+  - Project scope boundaries
+  - User stories
+  - Success metrics
+
+### User Stories:
+- Write testable user stories with acceptance criteria
+- Use consistent format: ID, Title, Description, Acceptance Criteria
+- Cover basic, alternative, and edge case scenarios
+- Include authentication/authorization stories when applicable
+
+### Planning Process:
+- Analyze project ideas and technical stack compatibility
+- Conduct thorough requirement analysis sessions
+- Document decisions and rationale
+- Create proof-of-concepts for critical functionality
+
+### Documentation:
+- Maintain comprehensive README with:
+  - Project description
+  - Tech stack details
+  - Local setup instructions
+  - Available scripts
+  - Project scope and status
+
+### Quality Assurance:
+- Ensure all user stories are testable
+- Define clear acceptance criteria
+- Plan for authentication and security requirements
+- Consider edge cases and error scenarios
