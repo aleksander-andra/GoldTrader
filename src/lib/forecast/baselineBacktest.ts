@@ -89,6 +89,17 @@ function baselineDecisionAtIndex(
  * na ostatnich windowDays dniach.
  */
 export async function computeBaselineAccuracy(windowDays = 90): Promise<BaselineBacktestResult> {
+  // If service-role credentials are missing (e.g. CI without secrets), return
+  // a neutral "no data" result instead of throwing. This keeps the public/admin
+  // endpoints stable while still signalling 0 samples to the caller.
+  if (!SERVICE_SUPABASE_URL || !SERVICE_SUPABASE_SERVICE_KEY) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[forecast] computeBaselineAccuracy: missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY – returning zero metrics"
+    );
+    return { windowDays, totalSamples: 0, correct: 0, accuracy: 0 };
+  }
+
   const client = getServiceRoleClient();
 
   const { data, error } = await client

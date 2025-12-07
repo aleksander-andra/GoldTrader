@@ -118,9 +118,21 @@ export function engineerFeaturesFromHistory(rows: PriceHistoryRow[]): Engineered
 export async function getEngineeredFeaturesForXauusdDaily(
   limit = 200
 ): Promise<{ asset: string; timeframe: string; items: EngineeredFeatureRow[] }> {
-  const client = getServiceRoleClient();
   const asset = "XAUUSD";
   const timeframe = "1d";
+
+  // In environments without service-role credentials (e.g. CI without secrets),
+  // fall back to an empty feature set instead of throwing, so that public
+  // endpoints can still respond with a neutral forecast.
+  if (!SERVICE_SUPABASE_URL || !SERVICE_SUPABASE_SERVICE_KEY) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[forecast] getEngineeredFeaturesForXauusdDaily: missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY – returning empty items"
+    );
+    return { asset, timeframe, items: [] };
+  }
+
+  const client = getServiceRoleClient();
 
   const { data, error } = await client
     .from("price_history")

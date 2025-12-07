@@ -1,5 +1,11 @@
 import { getEngineeredFeaturesForXauusdDaily, type EngineeredFeatureRow } from "./featureEngineering";
 
+const SERVICE_SUPABASE_URL =
+  (typeof process !== "undefined" && process.env.SUPABASE_URL) || import.meta.env.SUPABASE_URL;
+const SERVICE_SUPABASE_SERVICE_KEY =
+  (typeof process !== "undefined" && process.env.SUPABASE_SERVICE_ROLE_KEY) ||
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+
 export type BaselineDirection = "UP" | "DOWN" | "FLAT";
 
 export interface BaselineForecast {
@@ -56,7 +62,29 @@ function describeDecision(decision: BaselineDirection, last: EngineeredFeatureRo
 
 export async function getBaselineForecastForXauusd(): Promise<BaselineForecast | null> {
   const { asset, items } = await getEngineeredFeaturesForXauusdDaily(200);
-  if (!items.length) return null;
+
+  // When there are no engineered items, we distinguish between two cases:
+  // 1) service-role credentials are missing (e.g. CI without secrets) –
+  //    return a neutral FLAT forecast so public API keeps returning 200.
+  // 2) credentials are present but there is truly no history yet –
+  //    return null so that the handler can expose 503 as documented.
+  if (!items.length) {
+    const hasServiceRole = Boolean(SERVICE_SUPABASE_URL && SERVICE_SUPABASE_SERVICE_KEY);
+    if (!hasServiceRole) {
+      const nowIso = new Date().toISOString();
+      return {
+        asset,
+        timeframe: "1d",
+        horizon: "1d",
+        decision: "FLAT",
+        confidence: 0,
+        asOf: nowIso,
+        reason: "Brak danych historycznych lub konfiguracji Supabase – zwracam neutralną prognozę bazową (FLAT).",
+      };
+    }
+
+    return null;
+  }
 
   const last = items[items.length - 1];
 
