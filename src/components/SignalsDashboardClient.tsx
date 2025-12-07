@@ -2,6 +2,8 @@ import React from "react";
 import { getSupabaseBrowser } from "../lib/auth/browserClient";
 import type { Database } from "../db/database.types";
 import { XauusdChartClient } from "./XauusdChartClient";
+import { BaselineForecastCard } from "./forecast/BaselineForecastCard";
+import { ForecastHistoryChart } from "./forecast/ForecastHistoryChart";
 
 type SignalRow = Database["public"]["Tables"]["signals"]["Row"];
 type SignalWithStrategy = SignalRow & {
@@ -187,6 +189,8 @@ export function SignalsDashboardClient() {
           )}
         </div>
       </div>
+      <BaselineForecastCard />
+      <ForecastHistoryChart />
       <div className="flex items-baseline justify-between mb-3">
         <h2 className="text-xl font-semibold text-slate-900">Ostatnie sygnały XAUUSD (mock)</h2>
         <p className="text-xs text-slate-500">

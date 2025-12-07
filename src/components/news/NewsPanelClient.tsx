@@ -2,6 +2,7 @@ import React from "react";
 import type { RecommendationResult, NewsEventImpact } from "../../lib/news/newsTypes";
 import { RecommendationCard } from "./RecommendationCard";
 import { NewsEventsList } from "./NewsEventsList";
+import { ForecastComparisonCard } from "../forecast/ForecastComparisonCard";
 
 type RecommendationState =
   | { status: "idle" | "loading"; data: null; error: null }
@@ -93,6 +94,7 @@ export function NewsPanelClient() {
 
   return (
     <aside className="space-y-4">
+      <ForecastComparisonCard />
       <RecommendationCard recommendation={recoData} isLoading={isRecoLoading} error={recoError} />
       <NewsEventsList events={events.items} isLoading={isEventsLoading} />
     </aside>
