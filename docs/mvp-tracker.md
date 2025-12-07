@@ -54,46 +54,45 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 
 ```
 10xDevs MVP status (check-mvp)
-Overall: ~65% complete
+Overall: ~75% complete
 
 Documentation: OK
 PRD in docs/PRD.md; docs/env.example and docs/env.cloud.example present
-README has "How to run locally" + ENV + deploy-to-Vercel/ENV.cloud section
+README has up-to-date "How to run locally" + ENV + deploy-to-Vercel/ENV.cloud sections
 
 Login (Auth): PARTIAL
 Supabase Cloud configured; middleware + login/register/logout + reset hasła OK
-RBAC (user/admin) działa w API (profiles.role), UI ról nadal minimalny
+RBAC (user/admin) działa w API (profiles.role), UI ról nadal minimalny (role widoczne głównie w backendzie)
 
-Tests: PARTIAL
-Smoke script exists and passes (npm run smoke)
-Playwright E2E baseline added (/, /auth/login, /api/health) i odpalany w CI
+Tests: PARTIAL (improved)
+Smoke script (npm run smoke) plus rozszerzony zestaw Playwright E2E: login/dashboard, assets (admin CRUD po API), news panel, forecast API (/api/forecast/xauusd, /api/admin/forecast/baseline-metrics), network checks.
+E2E test UI CRUD assets admin nadal częściowo `skip`, ale główne ścieżki biznesowe są pokryte testami.
 
-Business Logic: PARTIAL
-Assets CRUD (admin) implemented over Supabase
-Mock signals engine + POST /api/admin/generate-signals + dashboard list for XAUUSD gotowe
+Business Logic: PARTIAL (MVP complete + część „Po MVP”)
+Assets CRUD (admin) implemented over Supabase; mock signals engine + POST /api/admin/generate-signals + dashboard list for XAUUSD gotowe.
+Dodany prosty forecast engine dla XAUUSD oparty na historycznych świecach dziennych (price_history) z feature engineeringiem i baseline modelem kierunkowym; wyniki zapisywane do price_forecasts/model_runs.
+Panel newsów korzysta z Alpha Vantage (asset_events z unikalnością po (asset, source_url)); agregator newsów dostępny na dashboardzie.
 
-CI/CD: PARTIAL
-GitHub Actions: lint + build + smoke + test:e2e + Supabase Cloud migrations
-Vercel deployment for main branch works (prod), previews dla PR dostępne
+CI/CD: OK
+GitHub Actions: lint + build + smoke + test:e2e + Supabase Cloud migrations.
+Vercel deployment for main branch works (prod), previews dla PR dostępne; Vercel Cron dla /api/admin/generate-signals nadal planowany „Po MVP”.
 
-Database: PARTIAL
-Schema and types OK (profiles, assets, strategies, signals) with RLS policies
-Migrations pushed to Supabase Cloud; seeding admin profile / plans still open
+Database: PARTIAL (blisko pełnego MVP)
+Schema and types OK (profiles, assets, strategies, signals) with RLS policies; XAUUSD asset seeded migracją 20251111_seed_core_data.sql.
+Dodatkowe tabele pod forecast engine (price_history, price_forecasts, model_runs) zaimplementowane; plany/LLM (`plans`, `provider_config`, `llm_queries`, `citations`) nadal „Po MVP”.
 
-API (Etap 1): PARTIAL
-GET /api/health OK
-/api/assets list + by id + admin CRUD implemented
-GET /api/signals i POST /api/admin/generate-signals (mock strategy) działają
+API (Etap 1): OK (plus nowe endpointy forecast)
+GET /api/health OK; /api/assets list + by id + admin CRUD implemented; GET /api/signals i POST /api/admin/generate-signals (mock strategy) działają.
+Dodane endpointy forecast: GET /api/forecast/xauusd (publiczny baseline forecast), GET /api/admin/forecast/baseline-metrics oraz backend sync cen z Alpha Vantage (price history) na potrzeby modelu.
 
 Source tool: manual check in Cursor using 10x-mvp-tracker guidelines
 
 Next 5 quick wins
-Seed XAUUSD + admin user + e2e testy kont (E2E_USER/E2E_ADMIN) i potwierdzenie RLS
-→ XAUUSD seed zrobiony migracją `20251111_seed_core_data.sql`; admin user tworzony ręcznie w Supabase Cloud (profil z `role='admin'`), RLS weryfikowany przez testy `assets-admin.spec.ts` / `assets-mutations.spec.ts` (token admina vs user/anon)
-Proste UI Assets (admin): lista + formularz create/edit/delete
-Rozszerzyć E2E o CRUD assets i generate-signals
-Zrefaktoryzować dashboard (wydzielenie komponentów, przygotowanie pod wykres XAUUSD)
-Przygotować szkic pod Vercel Cron /api/admin/generate-signals (bez włączania w MVP)
+Domknąć E2E UI scenariusz CRUD assets admin (usunąć tymczasowy `skip` i ustabilizować test).
+Dodać prosty endpoint GET /api/forecasts (lub rozszerzyć istniejący forecast/xauusd) zwracający historię prognoz na potrzeby UI overlay.
+Zaplanować i udokumentować minimalny flow planów taryfowych (tabela plans + podstawowe endpointy /api/plans, /api/admin/assign-plan) jako krok w stronę Etapu 2.
+Rozszerzyć observability dla forecast/news (spójne logi strukturalne, podstawowe metryki skuteczności w dashboardzie admina).
+Przygotować i przetestować konfigurację Vercel Cron dla /api/admin/generate-signals / sync-price-history (bez włączania na produkcji do czasu finalnego scope’u Etapu 2).
 ```
 
 ### Historia raportów
@@ -103,6 +102,7 @@ Przygotować szkic pod Vercel Cron /api/admin/generate-signals (bez włączania 
 | 2025-11-05 | ~35%       | README run guide; assets by id; seed XAUUSD/RLS; CI smoke; Playwright baseline                                 |
 | 2025-11-29 | ~55%       | CI + Supabase Cloud migrations; Vercel deploy; assets CRUD over Supabase; env.cloud wiring                     |
 | 2025-11-30 | ~65%       | Signals mock engine + dashboard list; GET /api/signals + POST /api/admin/generate-signals; Playwright E2E w CI |
+| 2025-12-07 | ~75%       | Forecast engine + price history/price_forecasts/model_runs; Alpha Vantage news ingest; rozszerzone testy E2E   |
 
 ### Notatki i decyzje
 

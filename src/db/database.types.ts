@@ -161,6 +161,129 @@ export interface Database {
           updated_at?: string;
         };
       };
+      price_history: {
+        Row: {
+          id: string;
+          asset: string;
+          timeframe: string;
+          ts: string;
+          open: number;
+          high: number;
+          low: number;
+          close: number;
+          volume: number | null;
+          source: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          asset: string;
+          timeframe: string;
+          ts: string;
+          open: number;
+          high: number;
+          low: number;
+          close: number;
+          volume?: number | null;
+          source: string;
+          created_at?: string;
+        };
+        Update: {
+          asset?: string;
+          timeframe?: string;
+          ts?: string;
+          open?: number;
+          high?: number;
+          low?: number;
+          close?: number;
+          volume?: number | null;
+          source?: string;
+          created_at?: string;
+        };
+      };
+      price_forecasts: {
+        Row: {
+          id: string;
+          asset: string;
+          timeframe: string;
+          forecast_horizon: string;
+          target_type: string;
+          prediction_value: number;
+          prediction_direction: string;
+          model_type: string;
+          model_version: string;
+          valid_from: string;
+          valid_to: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          asset: string;
+          timeframe: string;
+          forecast_horizon: string;
+          target_type: string;
+          prediction_value: number;
+          prediction_direction: string;
+          model_type: string;
+          model_version: string;
+          valid_from: string;
+          valid_to: string;
+          created_at?: string;
+        };
+        Update: {
+          asset?: string;
+          timeframe?: string;
+          forecast_horizon?: string;
+          target_type?: string;
+          prediction_value?: number;
+          prediction_direction?: string;
+          model_type?: string;
+          model_version?: string;
+          valid_from?: string;
+          valid_to?: string;
+          created_at?: string;
+        };
+      };
+      model_runs: {
+        Row: {
+          id: string;
+          model_type: string;
+          model_version: string;
+          asset: string;
+          timeframe: string;
+          train_start: string;
+          train_end: string;
+          val_metric_name: string;
+          val_metric_value: number;
+          params: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          model_type: string;
+          model_version: string;
+          asset: string;
+          timeframe: string;
+          train_start: string;
+          train_end: string;
+          val_metric_name: string;
+          val_metric_value: number;
+          params?: Json;
+          created_at?: string;
+        };
+        Update: {
+          model_type?: string;
+          model_version?: string;
+          asset?: string;
+          timeframe?: string;
+          train_start?: string;
+          train_end?: string;
+          val_metric_name?: string;
+          val_metric_value?: number;
+          params?: Json;
+          created_at?: string;
+        };
+      };
     };
   };
 }

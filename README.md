@@ -86,6 +86,27 @@ Open `http://localhost:4321`.
 Aktualny stan funkcjonalności GoldTradera (auth, dashboard sygnałów XAUUSD, panel admina do assets, API + E2E/CI/CD) jest śledzony w pliku `docs/mvp-tracker.md` — tam znajdziesz checklistę MVP oraz historię raportów z 10xDevs.  
 Planujemy (po MVP) podpięcie Vercel Cron do endpointu `POST /api/admin/generate-signals`; szkic rozwiązania i uwagi bezpieczeństwa opisuje `docs/vercel-cron-generate-signals.md`.
 
+### Forecast engine (baseline XAUUSD)
+
+Po MVP dodany został prosty silnik prognoz kierunkowych dla XAUUSD oparty wyłącznie na historycznych świecach dziennych:
+
+- **Dane historyczne**: tabela `price_history` (`asset = 'XAUUSD'`, `timeframe = '1d'`), zasilana z Alpha Vantage przez endpoint  
+  `POST /api/admin/sync-price-history` (zabezpieczony `X-Cron-Secret`).
+- **Feature engineering**: na bazie świec dziennych liczone są m.in.:
+  - dzienny logarytmiczny zwrot (`logReturn1d`),
+  - średnie kroczące `SMA(5)` i `SMA(20)`,
+  - prosta etykieta kierunku (`label = UP/DOWN/FLAT`) na podstawie ruchu w kolejnym dniu (próg ~0.1%).
+- **Model bazowy**:
+  - patrzy na ostatnie okno ~10 etykiet i wybiera większość (`UP/DOWN/FLAT`),
+  - w razie remisu lub braku etykiet używa relacji `SMA(5)` vs `SMA(20)` jako fallbacku,
+  - wylicza prosty **confidence** (0–100) w zależności od spójności ostatnich etykiet.
+- **Zapisywanie prognoz**:
+  - każdorazowe uruchomienie zapisuje metadane biegu modelu do `model_runs` (`model_type = 'baseline_directional'`),
+  - sama prognoza trafia do `price_forecasts` (`target_type = 'direction'`, `prediction_direction = UP/DOWN/FLAT`),
+  - horyzont prognozy to 1 dzień (`horizon = '1d'`, `valid_from = asOf`, `valid_to = asOf + 1d`).
+
+Publiczny podgląd aktualnej prognozy jest dostępny pod `GET /api/forecast/xauusd` oraz w karcie „Forecast (bazowy)” na dashboardzie.
+
 ## Deploy na Vercel + Supabase Cloud (GoldTrader)
 
 1. **Przygotuj Supabase Cloud**
