@@ -11,10 +11,22 @@ interface CachedEvents {
 }
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000;
-const ENV_TTL_MS = Number(import.meta.env.NEWS_EVENTS_CACHE_TTL_MS) || DEFAULT_TTL_MS;
-const UI_MAX_EVENTS = Number(import.meta.env.NEWS_MAX_EVENTS_FOR_UI) || 6;
-const MIN_FINAL_SCORE = Number(import.meta.env.NEWS_MIN_FINAL_SCORE) || 40;
-const MAX_EVENT_AGE_DAYS = Number(import.meta.env.NEWS_MAX_EVENT_AGE_DAYS) || 7;
+const ENV_TTL_MS =
+  Number(
+    (typeof process !== "undefined" && process.env.NEWS_EVENTS_CACHE_TTL_MS) || import.meta.env.NEWS_EVENTS_CACHE_TTL_MS
+  ) || DEFAULT_TTL_MS;
+const UI_MAX_EVENTS =
+  Number(
+    (typeof process !== "undefined" && process.env.NEWS_MAX_EVENTS_FOR_UI) || import.meta.env.NEWS_MAX_EVENTS_FOR_UI
+  ) || 6;
+const MIN_FINAL_SCORE =
+  Number(
+    (typeof process !== "undefined" && process.env.NEWS_MIN_FINAL_SCORE) || import.meta.env.NEWS_MIN_FINAL_SCORE
+  ) || 40;
+const MAX_EVENT_AGE_DAYS =
+  Number(
+    (typeof process !== "undefined" && process.env.NEWS_MAX_EVENT_AGE_DAYS) || import.meta.env.NEWS_MAX_EVENT_AGE_DAYS
+  ) || 7;
 
 const cache = new Map<string, CachedEvents>();
 let provider: NewsProvider | null = null;
@@ -35,8 +47,10 @@ function getServiceClient() {
     return serviceClient;
   }
 
-  const url = import.meta.env.SUPABASE_URL;
-  const serviceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = (typeof process !== "undefined" && process.env.SUPABASE_URL) || import.meta.env.SUPABASE_URL;
+  const serviceKey =
+    (typeof process !== "undefined" && process.env.SUPABASE_SERVICE_ROLE_KEY) ||
+    import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceKey) {
     return null;

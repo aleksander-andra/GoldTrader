@@ -5,12 +5,20 @@ export const prerender = false;
 // GET /api/news/health
 // Prosty health-check dla panelu newsów i rekomendacji AI.
 export async function GET(): Promise<Response> {
-  const openaiApiKey = import.meta.env.OPENAI_API_KEY;
-  const openaiModel = import.meta.env.OPENAI_MODEL || "gpt-4o-mini";
-  const maxTokensRaw = import.meta.env.OPENAI_MAX_TOKENS_PER_CALL;
-  const recommendationTtlRaw = import.meta.env.RECOMMENDATION_CACHE_TTL_MS;
-  const newsTtlRaw = import.meta.env.NEWS_EVENTS_CACHE_TTL_MS;
-  const cronSecretRaw = import.meta.env.NEWS_CRON_SECRET;
+  const openaiApiKey = (typeof process !== "undefined" && process.env.OPENAI_API_KEY) || import.meta.env.OPENAI_API_KEY;
+  const openaiModel =
+    (typeof process !== "undefined" && process.env.OPENAI_MODEL) || import.meta.env.OPENAI_MODEL || "gpt-4o-mini";
+  const maxTokensRaw =
+    (typeof process !== "undefined" && process.env.OPENAI_MAX_TOKENS_PER_CALL) ||
+    import.meta.env.OPENAI_MAX_TOKENS_PER_CALL;
+  const recommendationTtlRaw =
+    (typeof process !== "undefined" && process.env.RECOMMENDATION_CACHE_TTL_MS) ||
+    import.meta.env.RECOMMENDATION_CACHE_TTL_MS;
+  const newsTtlRaw =
+    (typeof process !== "undefined" && process.env.NEWS_EVENTS_CACHE_TTL_MS) ||
+    import.meta.env.NEWS_EVENTS_CACHE_TTL_MS;
+  const cronSecretRaw =
+    (typeof process !== "undefined" && process.env.NEWS_CRON_SECRET) || import.meta.env.NEWS_CRON_SECRET;
 
   const maxTokens = Number(maxTokensRaw);
   const recommendationTtlMs = Number(recommendationTtlRaw);
