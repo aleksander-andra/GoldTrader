@@ -37,3 +37,4 @@ create index if not exists idx_price_history_asset_tf_ts_desc
 commit;
 
 
+
