@@ -10,6 +10,7 @@ export async function GET(): Promise<Response> {
   const maxTokensRaw = import.meta.env.OPENAI_MAX_TOKENS_PER_CALL;
   const recommendationTtlRaw = import.meta.env.RECOMMENDATION_CACHE_TTL_MS;
   const newsTtlRaw = import.meta.env.NEWS_EVENTS_CACHE_TTL_MS;
+  const cronSecretRaw = import.meta.env.NEWS_CRON_SECRET;
 
   const maxTokens = Number(maxTokensRaw);
   const recommendationTtlMs = Number(recommendationTtlRaw);
@@ -21,6 +22,9 @@ export async function GET(): Promise<Response> {
     openaiMaxTokensPerCall: Number.isFinite(maxTokens) ? maxTokens : 300,
     recommendationCacheTtlMs: Number.isFinite(recommendationTtlMs) ? recommendationTtlMs : 10 * 60 * 1000,
     newsEventsCacheTtlMs: Number.isFinite(newsEventsTtlMs) ? newsEventsTtlMs : 5 * 60 * 1000,
+    cronConfigured: typeof cronSecretRaw === "string" && cronSecretRaw.trim().length > 0,
+    cronSecretLength:
+      typeof cronSecretRaw === "string" && cronSecretRaw.trim().length > 0 ? cronSecretRaw.trim().length : 0,
     lastOpenAiRecommendationUsage: getLastOpenAiRecommendationUsage(),
   };
 
