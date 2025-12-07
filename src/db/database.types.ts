@@ -106,6 +106,61 @@ export interface Database {
           created_at?: string;
         };
       };
+      asset_events: {
+        Row: {
+          id: string;
+          asset: string;
+          title: string;
+          summary: string;
+          published_at: string;
+          source_name: string;
+          source_url: string;
+          direction: "POS" | "NEG" | "NEU";
+          impact_score: number;
+          source_score: number;
+          final_score: number;
+          prediction_direction: "POS" | "NEG" | "NEU" | null;
+          observed_direction: "POS" | "NEG" | "NEU" | null;
+          source_reliability_score: number | null;
+          created_at: string;
+          updated_at?: string;
+        };
+        Insert: {
+          id?: string;
+          asset: string;
+          title: string;
+          summary: string;
+          published_at: string;
+          source_name: string;
+          source_url: string;
+          direction: "POS" | "NEG" | "NEU";
+          impact_score: number;
+          source_score: number;
+          final_score: number;
+          prediction_direction?: "POS" | "NEG" | "NEU" | null;
+          observed_direction?: "POS" | "NEG" | "NEU" | null;
+          source_reliability_score?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          asset?: string;
+          title?: string;
+          summary?: string;
+          published_at?: string;
+          source_name?: string;
+          source_url?: string;
+          direction?: "POS" | "NEG" | "NEU";
+          impact_score?: number;
+          source_score?: number;
+          final_score?: number;
+          prediction_direction?: "POS" | "NEG" | "NEU" | null;
+          observed_direction?: "POS" | "NEG" | "NEU" | null;
+          source_reliability_score?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 }

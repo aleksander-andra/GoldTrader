@@ -100,15 +100,27 @@ export async function getRecommendationForAsset(
     const contextSummary = await buildContextSummary(assetId);
 
     const systemPrompt =
-      "Jesteś asystentem generującym bardzo krótkie rekomendacje tradingowe dla instrumentów finansowych. " +
-      "Twoim zadaniem jest na podstawie kontekstu zaproponować jedno z trzech działań: BUY, SELL lub HOLD. " +
-      "Odpowiadasz TYLKO w formacie JSON, bez żadnych komentarzy ani objaśnień.";
+      "Jesteś asystentem tradingowym generującym zwięzłe rekomendacje dla instrumentów finansowych. " +
+      "Na podstawie przekazanego kontekstu (ostatnie wydarzenia i ich wpływ na XAUUSD) masz zaproponować jedno z trzech działań: BUY, SELL lub HOLD. " +
+      "Rekomendacja dotyczy krótkoterminowego horyzontu (1–5 dni) i inwestora o neutralnej tolerancji ryzyka, bez dźwigni finansowej. " +
+      "Odpowiadasz TYLKO jednym poprawnym obiektem JSON, bez dodatkowego tekstu, komentarzy ani znaczników.";
 
     const userPrompt =
       `${contextSummary}\n\n` +
-      "Na podstawie tych informacji wygeneruj rekomendację dla krótkoterminowego tradera.\n" +
-      "Zwróć TYLKO poprawne JSON z polami:\n" +
-      '{ "decision": "BUY|SELL|HOLD", "reason": "1-3 krótkie zdania po polsku", "confidence": 0-100 }';
+      "Na podstawie powyższych informacji:\n" +
+      "- oceń łączny wpływ wydarzeń na kurs XAUUSD w krótkim terminie,\n" +
+      "- weź pod uwagę kierunek (pozytywny/negatywny) oraz siłę (1–10) każdego wydarzenia,\n" +
+      "- nie zakładaj ekstremalnej dźwigni ani skrajnie agresywnej spekulacji.\n\n" +
+      "Zwróć TYLKO poprawny JSON w formacie:\n" +
+      "{\n" +
+      '  "decision": "BUY" | "SELL" | "HOLD",\n' +
+      '  "reason": "1-3 krótkie zdania po polsku z głównymi argumentami",\n' +
+      '  "confidence": liczba_całkowita_od_0_do_100\n' +
+      "}\n\n" +
+      "Ustal confidence według siły sygnału:\n" +
+      "- 0–40 gdy sygnały są słabe lub sprzeczne,\n" +
+      "- 41–70 przy umiarkowanie spójnym sygnale,\n" +
+      "- 71–100 tylko przy bardzo silnym i jednoznacznym sygnale.";
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",

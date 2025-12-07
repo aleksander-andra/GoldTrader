@@ -172,8 +172,7 @@ export function SignalsDashboardClient() {
           )}
         </div>
         <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
-          {/* Wersja uproszczona: w opisie zaznaczamy, że wykres jest mockowany na bazie bieżącej ceny */}
-          Realna cena z Metals.dev (jeśli skonfigurowano METALS_API_KEY) + gładki, deterministyczny przebieg
+          Wykres poglądowy XAUUSD na podstawie danych z endpointu /api/prices.
         </p>
         <div className="relative h-56 w-full rounded-xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
           {prices.length === 0 ? (
