@@ -5,8 +5,10 @@ import { scoreAssetEvent } from "./newsScoringService";
 
 // Service-role Supabase client for cron/task usage.
 function createServiceRoleClient() {
-  const url = import.meta.env.SUPABASE_URL;
-  const serviceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = (typeof process !== "undefined" && process.env.SUPABASE_URL) || import.meta.env.SUPABASE_URL;
+  const serviceKey =
+    (typeof process !== "undefined" && process.env.SUPABASE_SERVICE_ROLE_KEY) ||
+    import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceKey) {
     throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for newsRefreshService");

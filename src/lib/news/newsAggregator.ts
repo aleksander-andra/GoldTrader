@@ -7,13 +7,21 @@ import { AlphaVantageNewsSource } from "./sources/alphaVantageNewsSource";
 export function buildNewsSources(): NewsSource[] {
   const sources: NewsSource[] = [];
 
-  const apiUrl = import.meta.env.NEWS_API_URL;
-  const apiKey = import.meta.env.NEWS_API_KEY;
-  const queryXauusd = import.meta.env.NEWS_API_QUERY_XAUUSD || "gold OR XAUUSD";
-  const pageSizeRaw = import.meta.env.NEWS_MAX_EVENTS_PER_SOURCE;
+  const apiUrl = (typeof process !== "undefined" && process.env.NEWS_API_URL) || import.meta.env.NEWS_API_URL;
+  const apiKey = (typeof process !== "undefined" && process.env.NEWS_API_KEY) || import.meta.env.NEWS_API_KEY;
+  const queryXauusd =
+    (typeof process !== "undefined" && process.env.NEWS_API_QUERY_XAUUSD) ||
+    import.meta.env.NEWS_API_QUERY_XAUUSD ||
+    "gold OR XAUUSD";
+  const pageSizeRaw =
+    (typeof process !== "undefined" && process.env.NEWS_MAX_EVENTS_PER_SOURCE) ||
+    import.meta.env.NEWS_MAX_EVENTS_PER_SOURCE;
   const pageSize = Number.isFinite(Number(pageSizeRaw)) ? Number(pageSizeRaw) : 30;
-  const alphaKey = import.meta.env.ALPHA_VANTAGE_API_KEY;
-  const alphaLimitRaw = import.meta.env.ALPHA_VANTAGE_MAX_EVENTS_PER_SOURCE;
+  const alphaKey =
+    (typeof process !== "undefined" && process.env.ALPHA_VANTAGE_API_KEY) || import.meta.env.ALPHA_VANTAGE_API_KEY;
+  const alphaLimitRaw =
+    (typeof process !== "undefined" && process.env.ALPHA_VANTAGE_MAX_EVENTS_PER_SOURCE) ||
+    import.meta.env.ALPHA_VANTAGE_MAX_EVENTS_PER_SOURCE;
   const alphaLimit = Number.isFinite(Number(alphaLimitRaw)) ? Number(alphaLimitRaw) : 50;
 
   if (apiUrl && apiKey) {

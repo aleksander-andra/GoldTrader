@@ -15,15 +15,22 @@ interface LastOpenAiUsage {
 }
 
 const DEFAULT_RECOMMENDATION_TTL_MS = 10 * 60 * 1000;
-const ENV_RECOMMENDATION_TTL_MS = Number(import.meta.env.RECOMMENDATION_CACHE_TTL_MS) || DEFAULT_RECOMMENDATION_TTL_MS;
+const ENV_RECOMMENDATION_TTL_MS =
+  Number(
+    (typeof process !== "undefined" && process.env.RECOMMENDATION_CACHE_TTL_MS) ||
+      import.meta.env.RECOMMENDATION_CACHE_TTL_MS
+  ) || DEFAULT_RECOMMENDATION_TTL_MS;
 
-const OPENAI_API_KEY = import.meta.env.OPENAI_API_KEY;
-const OPENAI_MODEL = import.meta.env.OPENAI_MODEL || "gpt-4o-mini";
-const OPENAI_MAX_TOKENS =
-  Number(import.meta.env.OPENAI_MAX_TOKENS_PER_CALL) &&
-  Number.isFinite(Number(import.meta.env.OPENAI_MAX_TOKENS_PER_CALL))
-    ? Number(import.meta.env.OPENAI_MAX_TOKENS_PER_CALL)
-    : 300;
+const OPENAI_API_KEY = (typeof process !== "undefined" && process.env.OPENAI_API_KEY) || import.meta.env.OPENAI_API_KEY;
+
+const OPENAI_MODEL =
+  (typeof process !== "undefined" && process.env.OPENAI_MODEL) || import.meta.env.OPENAI_MODEL || "gpt-4o-mini";
+
+const OPENAI_MAX_TOKENS_RAW =
+  (typeof process !== "undefined" && process.env.OPENAI_MAX_TOKENS_PER_CALL) ||
+  import.meta.env.OPENAI_MAX_TOKENS_PER_CALL;
+
+const OPENAI_MAX_TOKENS = Number.isFinite(Number(OPENAI_MAX_TOKENS_RAW)) ? Number(OPENAI_MAX_TOKENS_RAW) : 300;
 
 const recommendationCache = new Map<string, CachedRecommendation>();
 let lastOpenAiUsage: LastOpenAiUsage | null = null;
