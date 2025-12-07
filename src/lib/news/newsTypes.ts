@@ -26,3 +26,24 @@ export interface NewsEventImpact {
   strength: number;
   source: string;
 }
+
+// Backend-domain representation of a news event stored in Supabase.
+// This is deliberately more detailed than NewsEventImpact (which is UI-focused).
+export type AssetEventDirection = "POS" | "NEG" | "NEU";
+
+export interface AssetEvent {
+  id: string;
+  asset: string;
+  title: string;
+  summary: string;
+  publishedAt: string;
+  sourceName: string;
+  sourceUrl: string;
+  direction: AssetEventDirection;
+  impactScore: number;
+  sourceScore: number;
+  finalScore: number;
+  predictionDirection?: AssetEventDirection | null;
+  observedDirection?: AssetEventDirection | null;
+  sourceReliabilityScore?: number | null;
+}

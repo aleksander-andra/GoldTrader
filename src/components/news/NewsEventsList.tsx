@@ -49,7 +49,7 @@ export function NewsEventsList({ events, isLoading }: NewsEventsListProps) {
             Wydarzenia wpływające na kurs
           </h2>
           <p className="mt-1 text-xs text-slate-500">
-            Mockowane wydarzenia makroekonomiczne i geopolityczne dla XAUUSD.
+            Wydarzenia makroekonomiczne i geopolityczne dla XAUUSD z zewnętrznych źródeł newsów.
           </p>
         </div>
         {events.length > 0 ? <span className="text-[11px] text-slate-400">{events.length} wydarzenia</span> : null}
