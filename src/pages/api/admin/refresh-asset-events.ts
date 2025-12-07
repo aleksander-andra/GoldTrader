@@ -7,10 +7,12 @@ export const prerender = false;
 // Simple admin/cron endpoint to refresh news events for a given asset.
 // Security: expects X-Cron-Secret header matching NEWS_CRON_SECRET env.
 export async function POST(context: APIContext) {
-  const cronSecret = import.meta.env.NEWS_CRON_SECRET;
-  const header = context.request.headers.get("x-cron-secret");
+  const secretRaw = import.meta.env.NEWS_CRON_SECRET;
+  const cronSecret = typeof secretRaw === "string" ? secretRaw.trim() : "";
+  const headerRaw = context.request.headers.get("x-cron-secret");
+  const header = headerRaw ? headerRaw.trim() : "";
 
-  if (!cronSecret || header !== cronSecret) {
+  if (!cronSecret || !header || header !== cronSecret) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
