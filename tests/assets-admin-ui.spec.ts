@@ -23,7 +23,10 @@ async function loginAsAdmin(page: import("@playwright/test").Page) {
   await page.screenshot({ path: "debug-after-login.png", fullPage: true });
 }
 
-test.skip("admin can manage asset via UI", async ({ page }) => {
+test("admin can manage asset via UI", async ({ page }) => {
+  // CI ma niestabilne połączenie headless przeglądarki z Supabase, więc ten
+  // scenariusz UI traktujemy jako lokalny (manual + Playwright) i pomijamy w CI.
+  test.skip(process.env.CI === "true", "Skipping admin UI CRUD in CI (Supabase browser login unstable)");
   await loginAsAdmin(page);
 
   await page.goto("/admin/assets");

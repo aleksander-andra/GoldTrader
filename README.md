@@ -73,7 +73,37 @@ APP_URL=http://localhost:4321
 
 Tip: For local Supabase, use “Publishable key” as anon; do not use the secret key in the client.
 
-3. Run the dev server (Astro on port 4321):
+### Local admin user (RBAC)
+
+GoldTrader używa prostego RBAC opartego o tabelę `profiles` w Supabase. Rola `admin` jest wymagana do korzystania z części endpointów/admin‑widoków (np. zarządzania assets).
+
+Minimalny flow dla środowiska lokalnego:
+
+1. Uruchom aplikację (`npm run dev`) i zarejestruj użytkownika przez formularz **Rejestracja**.
+2. Ustaw zmienne w `.env.local`:
+
+   ```env
+   # Supabase service role (tylko po stronie serwera / lokalnie, nigdy w przeglądarce)
+   SUPABASE_SERVICE_ROLE_KEY=sb_service_role_...
+
+   # email użytkownika, którego chcesz podnieść do roli admina
+   E2E_ADMIN_EMAIL=twoj-admin@example.com
+   ```
+
+3. Uruchom skrypt seedujący admina:
+
+   ```bash
+   npm run seed:admin
+   ```
+
+   Skrypt:
+   - znajduje użytkownika w Supabase Auth po `E2E_ADMIN_EMAIL`,
+   - w tabeli `profiles` ustawia `role = 'admin'` (upsert po `user_id`),
+   - dzięki temu użytkownik ma dostęp do akcji/admin‑endpoints chronionych przez RLS.
+
+4. Zaloguj się tym użytkownikiem — w profilu zobaczysz rolę `admin`, a w nawigacji badge „admin” przy linku `Profil`.
+
+5. Run the dev server (Astro on port 4321):
 
 ```bash
 npm run dev
