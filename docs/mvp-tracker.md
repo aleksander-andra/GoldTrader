@@ -6,15 +6,15 @@ Link: [GitHub – 10x-mvp-tracker](https://github.com/przeprogramowani/10x-mvp-t
 
 ### Kryteria oceny (7)
 
-- [ ] Dokumentacja
-  - [ ] README uzupełnione o „Jak startujemy” i instrukcje ENV/Deploy
+- [x] Dokumentacja
+  - [x] README uzupełnione o „Jak startujemy” i instrukcje ENV/Deploy
   - [x] PRD dostępny w `docs/PRD.md` (sekcja „MVP Scope (Etap 1)”)
   - [x] `docs/env.example` kompletne i aktualne
 
 - [ ] Logowanie (Auth)
   - [x] Supabase skonfigurowany (URL/KEY, `supabase.client.ts`, middleware)
   - [x] UI logowanie/rejestracja/wylogowanie
-  - [ ] RBAC (user/admin) — bez planów taryfowych w Etapie 1
+  - [x] RBAC (user/admin) — bez planów taryfowych w Etapie 1
 
 - [ ] Testy
   - [ ] Playwright E2E: login ±, dashboard (chart + sygnały), CRUD assets (admin), generate‑signals — login + health + dashboard sygnałów + CRUD/generate‑signals po API działają, test UI CRUD assets admin **tymczasowo `skip`** (patrz `docs/e2e-admin-admin-assets-ui.md`)
