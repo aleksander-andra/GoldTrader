@@ -10,12 +10,15 @@ if (existsSync(envPath)) {
 }
 
 const baseURL = process.env.APP_URL?.trim() || "http://localhost:4321";
+const videoMode = process.env.PW_VIDEO === "on" ? "on" : "off";
 
 const config: PlaywrightTestConfig = {
   testDir: "./tests",
   timeout: 30_000,
   use: {
     baseURL,
+    // Optional video recording for debugging: set PW_VIDEO=on before running tests.
+    video: videoMode,
   },
   reporter: [["list"]],
   globalTeardown: "./tests/globalTeardown.ts",
