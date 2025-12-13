@@ -44,10 +44,6 @@ Cron jobs są skonfigurowane w pliku `vercel.json`:
   "crons": [
     {
       "path": "/api/admin/cron/generate-signals",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/admin/cron/sync-price-history",
       "schedule": "0 6 * * *"
     },
     {
@@ -60,9 +56,10 @@ Cron jobs są skonfigurowane w pliku `vercel.json`:
 
 **Harmonogram:**
 
-- `generate-signals`: `0 * * * *` - co godzinę (o pełnej godzinie)
-- `sync-price-history`: `0 6 * * *` - raz dziennie o 06:00 UTC (dla jednego aktywa - domyślnie XAUUSD)
+- `generate-signals`: `0 6 * * *` - raz dziennie o 06:00 UTC (plan Hobby: max 1x dziennie)
 - `sync-all-assets-price-history`: `0 7 * * *` - raz dziennie o 07:00 UTC (dla wszystkich aktywów z bazy)
+
+**Uwaga:** Konfiguracja dostosowana do planu Hobby (maksymalnie 2 cron jobs, każdy raz dziennie). Jeśli masz plan Pro, możesz zwiększyć częstotliwość (np. `0 * * * *` dla co godzinę).
 
 **Dostosowanie harmonogramu:**
 Możesz zmienić harmonogram w `vercel.json` lub skonfigurować go ręcznie w Vercel Dashboard:
