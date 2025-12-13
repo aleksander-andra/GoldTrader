@@ -6,15 +6,15 @@ import { syncDailyPriceHistoryForAsset } from "../../../../lib/forecast/priceHis
 export const prerender = false;
 
 /**
- * POST /api/admin/cron/sync-all-assets-price-history
+ * GET/POST /api/admin/cron/sync-all-assets-price-history
  *
  * Dedykowany endpoint dla Vercel Cron Jobs.
  * Synchronizuje historię cen dla WSZYSTKICH assetów z tabeli assets.
  * Zabezpieczony przez X-CRON-SECRET header.
  *
- * Body (opcjonalnie): { symbols?: string[] } - jeśli podane, synchronizuje tylko te symbole
+ * Body (POST) lub query params (GET, opcjonalnie): { symbols?: string[] } - jeśli podane, synchronizuje tylko te symbole
  */
-export async function POST(context: APIContext) {
+async function handleRequest(context: APIContext) {
   // Weryfikuj secret header
   const cronSecret = context.request.headers.get("x-cron-secret");
   const expectedSecret = import.meta.env.CRON_SECRET;
@@ -51,14 +51,24 @@ export async function POST(context: APIContext) {
     },
   });
 
-  let body: unknown;
-  try {
-    body = await context.request.json();
-  } catch {
-    body = {};
-  }
+  // Pobierz parametry z body (POST) lub query string (GET)
+  let symbols: unknown;
 
-  const { symbols } = (body as { symbols?: unknown }) ?? {};
+  if (context.request.method === "POST") {
+    try {
+      const body = await context.request.json();
+      symbols = (body as { symbols?: unknown })?.symbols;
+    } catch {
+      // body opcjonalne
+    }
+  } else {
+    // GET - pobierz z query string (np. ?symbols=XAUUSD,EURUSD)
+    const url = new URL(context.request.url);
+    const symbolsParam = url.searchParams.get("symbols");
+    if (symbolsParam) {
+      symbols = symbolsParam.split(",").map((s) => s.trim());
+    }
+  }
 
   // Jeśli podano konkretne symbole, użyj ich; w przeciwnym razie pobierz wszystkie z bazy
   let symbolsToSync: string[];
@@ -121,4 +131,14 @@ export async function POST(context: APIContext) {
       headers: { "Content-Type": "application/json" },
     }
   );
+}
+
+// GET handler - wywołuje tę samą logikę co POST
+export async function GET(context: APIContext) {
+  return handleRequest(context);
+}
+
+// POST handler - wywołuje tę samą logikę
+export async function POST(context: APIContext) {
+  return handleRequest(context);
 }

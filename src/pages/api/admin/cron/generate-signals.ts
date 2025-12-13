@@ -7,15 +7,15 @@ import { generateSignalsForAsset } from "../../../../lib/signals/generationServi
 export const prerender = false;
 
 /**
- * POST /api/admin/cron/generate-signals
+ * GET/POST /api/admin/cron/generate-signals
  *
  * Dedykowany endpoint dla Vercel Cron Jobs.
  * Używa SUPABASE_SERVICE_ROLE_KEY zamiast tokena użytkownika.
  * Zabezpieczony przez X-CRON-SECRET header.
  *
- * Body (opcjonalnie): { symbol?: string; validFromOffsetMinutes?: number; validToOffsetMinutes?: number; lookbackMinutes?: number }
+ * Body (POST) lub query params (GET, opcjonalnie): { symbol?: string; validFromOffsetMinutes?: number; validToOffsetMinutes?: number; lookbackMinutes?: number }
  */
-export async function POST(context: APIContext) {
+async function handleRequest(context: APIContext) {
   // Weryfikuj secret header
   const cronSecret = context.request.headers.get("x-cron-secret");
   const expectedSecret = import.meta.env.CRON_SECRET;
@@ -45,20 +45,36 @@ export async function POST(context: APIContext) {
     });
   }
 
-  let body: unknown;
-  try {
-    body = await context.request.json();
-  } catch {
-    body = {};
+  // Pobierz parametry z body (POST) lub query string (GET)
+  let params: {
+    symbol?: unknown;
+    validFromOffsetMinutes?: unknown;
+    validToOffsetMinutes?: unknown;
+    lookbackMinutes?: unknown;
+  } = {};
+
+  if (context.request.method === "POST") {
+    try {
+      const body = await context.request.json();
+      params = (body as typeof params) ?? {};
+    } catch {
+      // body opcjonalne
+    }
+  } else {
+    // GET - pobierz z query string
+    const url = new URL(context.request.url);
+    const symbolParam = url.searchParams.get("symbol");
+    const fromParam = url.searchParams.get("validFromOffsetMinutes");
+    const toParam = url.searchParams.get("validToOffsetMinutes");
+    const lookbackParam = url.searchParams.get("lookbackMinutes");
+
+    if (symbolParam) params.symbol = symbolParam;
+    if (fromParam) params.validFromOffsetMinutes = Number(fromParam);
+    if (toParam) params.validToOffsetMinutes = Number(toParam);
+    if (lookbackParam) params.lookbackMinutes = Number(lookbackParam);
   }
 
-  const { symbol, validFromOffsetMinutes, validToOffsetMinutes, lookbackMinutes } =
-    (body as {
-      symbol?: unknown;
-      validFromOffsetMinutes?: unknown;
-      validToOffsetMinutes?: unknown;
-      lookbackMinutes?: unknown;
-    }) ?? {};
+  const { symbol, validFromOffsetMinutes, validToOffsetMinutes, lookbackMinutes } = params;
 
   const symbolStr = typeof symbol === "string" && symbol.trim() ? symbol.trim() : "XAUUSD";
 
@@ -145,4 +161,14 @@ export async function POST(context: APIContext) {
       headers: { "Content-Type": "application/json" },
     });
   }
+}
+
+// GET handler - wywołuje tę samą logikę co POST
+export async function GET(context: APIContext) {
+  return handleRequest(context);
+}
+
+// POST handler - wywołuje tę samą logikę
+export async function POST(context: APIContext) {
+  return handleRequest(context);
 }
