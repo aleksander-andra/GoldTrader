@@ -174,6 +174,8 @@ Publiczny podgląd aktualnej prognozy jest dostępny pod `GET /api/forecast/xauu
        - `https://twoj-projekt.vercel.app/auth/reset-password`
        - `http://localhost:4321/auth/reset-password` (dla dev).
 
+   **Uwaga:** Logowanie w normalnej przeglądarce działa bez dodatkowej konfiguracji. Problem z "Failed to fetch" występuje tylko w testach Playwright (patrz `docs/e2e-admin-admin-assets-ui.md`).
+
 5. **Migracje bazy w CI (GitHub Actions → Secrets and variables → Actions)**
 
    Zgodnie z `docs/env.cloud.example` i `.github/workflows/ci.yml` ustaw:

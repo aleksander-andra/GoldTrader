@@ -417,8 +417,8 @@ export function AdminSignalsClient() {
   const { assets, candidates } = state;
 
   return (
-    <section className="space-y-6">
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+    <section className="space-y-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-slate-900">Generator sygnałów</h2>
           <div className="flex flex-wrap items-end gap-2 text-left">
@@ -507,6 +507,7 @@ export function AdminSignalsClient() {
               type="button"
               variant="outline"
               size="sm"
+              className="border-blue-300 bg-white text-blue-700 hover:bg-blue-100"
               onClick={() => void handleGenerateSignals()}
               disabled={generating || refreshing || syncingHistory || assets.length === 0}
             >
@@ -516,6 +517,7 @@ export function AdminSignalsClient() {
               type="button"
               variant="outline"
               size="sm"
+              className="border-blue-300 bg-white text-blue-700 hover:bg-blue-100"
               onClick={() => void handleRefreshAndGenerate()}
               disabled={refreshing || generating || syncingHistory || assets.length === 0}
             >
@@ -525,6 +527,7 @@ export function AdminSignalsClient() {
               type="button"
               variant="outline"
               size="sm"
+              className="border-blue-300 bg-white text-blue-700 hover:bg-blue-100"
               onClick={() => void handleSyncPriceHistory()}
               disabled={syncingHistory || generating || refreshing}
             >
@@ -546,7 +549,7 @@ export function AdminSignalsClient() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
         <h2 className="mb-2 text-lg font-semibold text-slate-900">Kandydaci sygnałów</h2>
         {candidates.length === 0 ? (
           <p className="text-sm text-slate-600">
@@ -597,7 +600,15 @@ export function AdminSignalsClient() {
                       )}
                     </td>
                     <td className="px-2 py-1 align-top">
-                      <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2 py-0.5 font-mono text-[10px] uppercase">
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase ${
+                          c.type === "BUY"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                            : c.type === "SELL"
+                              ? "border-red-300 bg-red-50 text-red-700"
+                              : "border-slate-300 bg-slate-50 text-slate-700"
+                        }`}
+                      >
                         {c.type}
                       </span>
                     </td>
@@ -614,7 +625,7 @@ export function AdminSignalsClient() {
                           type="button"
                           size="xs"
                           variant="outline"
-                          className="px-2 text-[10px] whitespace-nowrap"
+                          className="border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-100 px-2 text-[10px] whitespace-nowrap"
                           onClick={() => void handleAcceptRejectSignal(c.id, "accept")}
                           disabled={saving}
                         >
@@ -623,8 +634,8 @@ export function AdminSignalsClient() {
                         <Button
                           type="button"
                           size="xs"
-                          variant="destructive"
-                          className="px-2 text-[10px] whitespace-nowrap"
+                          variant="outline"
+                          className="border-red-300 bg-white text-red-700 hover:bg-red-100 px-2 text-[10px] whitespace-nowrap"
                           onClick={() => void handleAcceptRejectSignal(c.id, "reject")}
                           disabled={saving}
                         >

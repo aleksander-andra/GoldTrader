@@ -177,8 +177,8 @@ export function AdminAssetsClient() {
   const { assets, message } = state;
 
   return (
-    <section className="space-y-6">
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+    <section className="space-y-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
         <h2 className="text-lg font-semibold text-slate-900">{editingId ? "Edytuj aktywo" : "Dodaj aktywo"}</h2>
         <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-4 items-end">
           <div className="space-y-1 sm:col-span-1">
@@ -224,13 +224,19 @@ export function AdminAssetsClient() {
             />
           </div>
           <div className="flex gap-2 justify-end sm:col-span-4">
-            <Button type="submit" disabled={saving}>
+            <Button
+              type="submit"
+              variant="outline"
+              className="border-blue-300 bg-white text-blue-700 hover:bg-blue-100"
+              disabled={saving}
+            >
               {saving ? "Zapisywanie..." : editingId ? "Zapisz zmiany" : "Dodaj"}
             </Button>
             {editingId && (
               <Button
                 type="button"
                 variant="outline"
+                className="border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
                 disabled={saving}
                 onClick={() => {
                   setEditingId(null);
@@ -247,7 +253,7 @@ export function AdminAssetsClient() {
         {message && <p className="text-xs text-slate-500">{message}</p>}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
         <h2 className="mb-3 text-lg font-semibold text-slate-900">Aktywa</h2>
         {assets.length === 0 ? (
           <p className="text-sm text-slate-600">Brak aktyw. Dodaj pierwsze aktywo powyżej.</p>
@@ -274,6 +280,7 @@ export function AdminAssetsClient() {
                           type="button"
                           variant="outline"
                           size="sm"
+                          className="border-blue-300 bg-white text-blue-700 hover:bg-blue-100"
                           onClick={() => void handleEdit(a)}
                           disabled={saving}
                         >
@@ -281,8 +288,9 @@ export function AdminAssetsClient() {
                         </Button>
                         <Button
                           type="button"
-                          variant="destructive"
+                          variant="outline"
                           size="sm"
+                          className="border-red-300 bg-white text-red-700 hover:bg-red-100"
                           onClick={() => void handleDelete(a.id)}
                           disabled={saving}
                         >
