@@ -1,51 +1,187 @@
-## Vercel Cron — szkic dla `/api/admin/generate-signals`
+## Vercel Cron — automatyzacja generowania sygnałów i synchronizacji
 
-Ten dokument opisuje, jak po MVP można podpiąć Vercel Cron do endpointu `POST /api/admin/generate-signals`, żeby okresowo generować mockowe sygnały dla XAUUSD.
+Ten dokument opisuje zaimplementowaną integrację z Vercel Cron Jobs do automatycznego generowania sygnałów i synchronizacji historii cen.
 
-### 1. Założenia
+### 1. Zaimplementowane endpointy
 
-- Backend (Astro) jest już wdrożony na Vercel pod domeną np. `https://gold-trader-one.vercel.app`.
-- Endpoint `POST /api/admin/generate-signals`:
-  - wymaga **tokena admina** w nagłówku `Authorization: Bearer <jwt>`,
-  - ma limity dobowego użycia (`enforceDailyLimit("signals:generate", 20)`),
-  - jest idempotentny „w sensie biznesowym” — wielokrotne wywołanie dodaje kolejne mockowe sygnały, ale nie psuje stanu.
+#### `/api/admin/cron/generate-signals`
 
-### 2. Jak to spiąć z Vercel Cron (wysoki poziom)
+- **Metoda**: `POST`
+- **Autoryzacja**: Header `X-CRON-SECRET` (z ENV `CRON_SECRET`)
+- **Funkcjonalność**: Generuje sygnały dla aktywów (domyślnie XAUUSD)
+- **Używa**: `SUPABASE_SERVICE_ROLE_KEY` (bypassuje RLS)
+- **Parametry** (opcjonalne w body):
+  - `symbol` - symbol aktywa (domyślnie "XAUUSD")
+  - `validFromOffsetMinutes` - offset w minutach od teraz (domyślnie 0)
+  - `validToOffsetMinutes` - offset w minutach do końca ważności (domyślnie 60)
+  - `lookbackMinutes` - okno historii w minutach (domyślnie 240)
 
-1. W panelu Vercel:
-   - `Project` → `Settings` → `Cron Jobs` → `Add`.
-2. Konfiguracja przykładowa:
-   - **Path**: `/api/admin/generate-signals`
-   - **Method**: `POST`
-   - **Schedule**: np. `0 * * * *` (raz na godzinę) lub `0 6 * * *` (raz dziennie o 06:00 UTC).
-3. Nagłówki / auth:
-   - Vercel Cron **nie dodaje sam z siebie** tokena Supabase,
-   - żeby endpoint działał, trzeba dodać nagłówek `Authorization` z tokenem admina.
+#### `/api/admin/cron/sync-price-history`
 
-### 3. Skąd wziąć token admina do Crona
+- **Metoda**: `POST`
+- **Autoryzacja**: Header `X-CRON-SECRET` (z ENV `CRON_SECRET`)
+- **Funkcjonalność**: Synchronizuje historię cen z Alpha Vantage do bazy danych dla **jednego** aktywa
+- **Używa**: `SUPABASE_SERVICE_ROLE_KEY` (bypassuje RLS)
+- **Parametry** (opcjonalne w body):
+  - `symbol` - symbol aktywa (domyślnie "XAUUSD")
 
-Na razie **NIE trzymamy tokena admina w Vercel ENV** — to byłoby kruche (krótki czas życia tokenu). Zamiast tego rozsądniejsze, produkcyjne podejścia (poza MVP) to np.:
+#### `/api/admin/cron/sync-all-assets-price-history`
 
-- osobny „service user” z kluczem serwisowym (Supabase Service Role) i dedykowanym endpointem tylko dla Crone’a,
-- albo mechanizm, który przy wywołaniu Crone’a loguje się do Supabase (po serwerowej stronie) i generuje tymczasowy token.
+- **Metoda**: `POST`
+- **Autoryzacja**: Header `X-CRON-SECRET` (z ENV `CRON_SECRET`)
+- **Funkcjonalność**: Synchronizuje historię cen dla **WSZYSTKICH** aktywów z tabeli `assets`
+- **Używa**: `SUPABASE_SERVICE_ROLE_KEY` (bypassuje RLS)
+- **Parametry** (opcjonalne w body):
+  - `symbols` - tablica symboli do synchronizacji (jeśli podane, synchronizuje tylko te; w przeciwnym razie wszystkie z bazy)
+- **Zwraca**: Statystyki dla każdego aktywa (inserted, errors)
 
-Na etapie MVP **świadomie tego nie wdrażamy** — endpoint `/api/admin/generate-signals` służy nam głównie do ręcznego generowania mocków (curl / panel admina), a Vercel Cron jest tylko opisanym szkicem „co dalej”.
+### 2. Konfiguracja Vercel Cron
 
-### 4. Co trzeba będzie dopisać po MVP
+Cron jobs są skonfigurowane w pliku `vercel.json`:
 
-1. Dedykowany endpoint tylko dla Crone’a, np. `POST /api/admin/generate-signals-cron`:
-   - zabezpieczony np. sekretnym nagłówkiem `X-CRON-SECRET` ustawionym w Vercel ENV,
-   - po stronie serwera korzysta z Supabase **service key** (nie z tokenu usera),
-   - woła wewnętrznie ten sam kod generujący mock sygnały (wydzielony do wspólnej funkcji).
-2. Konfiguracja Vercel Cron:
-   - Path: `/api/admin/generate-signals-cron`
-   - Method: `POST`
-   - Nagłówek `X-CRON-SECRET: ...` z sekretem z ENV.
-3. E2E/integra test:
-   - prosty test, który uderza w endpoint „cronowy” na środowisku preview i sprawdza, że dodaje sygnały dla XAUUSD (przy wyłączonym limicie dobowym lub z limitem przestawionym na testowe wartości).
+```json
+{
+  "crons": [
+    {
+      "path": "/api/admin/cron/generate-signals",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/admin/cron/sync-price-history",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/admin/cron/sync-all-assets-price-history",
+      "schedule": "0 7 * * *"
+    }
+  ]
+}
+```
 
-### 5. Status na dziś
+**Harmonogram:**
 
-- Endpoint `/api/admin/generate-signals` jest gotowy, testowany ręcznie i w testach API.
-- Ten plik **jest jedynie szkicem** integracji z Vercel Cron i NIE ma jeszcze żadnej kodowej integracji (brak nowego endpointu, brak Crone’a w panelu Vercel).
-- Po MVP, jeśli będziemy automatyzować generowanie sygnałów, należy wrócić do tego dokumentu i zaimplementować opisany powyżej wariant z dedykowanym endpointem cronowym oraz sekretnym nagłówkiem.
+- `generate-signals`: `0 * * * *` - co godzinę (o pełnej godzinie)
+- `sync-price-history`: `0 6 * * *` - raz dziennie o 06:00 UTC (dla jednego aktywa - domyślnie XAUUSD)
+- `sync-all-assets-price-history`: `0 7 * * *` - raz dziennie o 07:00 UTC (dla wszystkich aktywów z bazy)
+
+**Dostosowanie harmonogramu:**
+Możesz zmienić harmonogram w `vercel.json` lub skonfigurować go ręcznie w Vercel Dashboard:
+
+- `Project` → `Settings` → `Cron Jobs`
+
+**Format harmonogramu (cron):**
+
+- `0 * * * *` - co godzinę
+- `0 6 * * *` - codziennie o 06:00 UTC
+- `*/15 * * * *` - co 15 minut
+- `0 0 * * *` - codziennie o północy UTC
+
+### 3. Konfiguracja zmiennych środowiskowych
+
+W Vercel Dashboard (`Project` → `Settings` → `Environment Variables`) ustaw:
+
+1. **`CRON_SECRET`** - losowy, bezpieczny string (np. wygeneruj przez `openssl rand -hex 32`)
+   - Używany do autoryzacji wywołań cron
+   - **WAŻNE**: Nie udostępniaj tego sekretu publicznie!
+
+2. **`SUPABASE_SERVICE_ROLE_KEY`** - Service Role Key z Supabase
+   - Znajdziesz w: Supabase Dashboard → Project Settings → API → `service_role` key
+   - **WAŻNE**: Ten klucz bypassuje RLS - trzymaj go w tajemnicy!
+
+3. Pozostałe zmienne (jak w `docs/env.cloud.example`):
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `ALPHA_VANTAGE_API_KEY` (dla synchronizacji cen)
+   - itd.
+
+### 4. Bezpieczeństwo
+
+**Autoryzacja:**
+
+- Endpointy cron wymagają nagłówka `X-CRON-SECRET` z wartością równą `CRON_SECRET` z ENV
+- Vercel automatycznie dodaje ten nagłówek przy wywołaniach cron (jeśli skonfigurowane w Dashboard)
+- Alternatywnie możesz ustawić nagłówek ręcznie w konfiguracji cron w Vercel Dashboard
+
+**Service Role Key:**
+
+- Endpointy używają `SUPABASE_SERVICE_ROLE_KEY` zamiast tokena użytkownika
+- To pozwala na bypass RLS i wykonywanie operacji administracyjnych
+- **NIGDY** nie używaj service role key w kodzie frontendowym!
+
+**Limity:**
+
+- Endpointy cron **nie** używają `enforceDailyLimit` (są przeznaczone do automatyzacji)
+- Jeśli potrzebujesz limitów, możesz je dodać wewnątrz endpointów cron
+
+### 5. Testowanie lokalnie
+
+Możesz przetestować endpointy cron lokalnie (przed deployem):
+
+```bash
+# Generuj sygnały
+curl -X POST http://localhost:4321/api/admin/cron/generate-signals \
+  -H "Content-Type: application/json" \
+  -H "X-CRON-SECRET: your-secret-here" \
+  -d '{"symbol": "XAUUSD"}'
+
+# Synchronizuj historię cen
+curl -X POST http://localhost:4321/api/admin/cron/sync-price-history \
+  -H "Content-Type: application/json" \
+  -H "X-CRON-SECRET: your-secret-here" \
+  -d '{"symbol": "XAUUSD"}'
+```
+
+**Uwaga**: Upewnij się, że masz ustawione `CRON_SECRET` i `SUPABASE_SERVICE_ROLE_KEY` w `.env.local`.
+
+### 6. Monitoring i logi
+
+**Vercel Dashboard:**
+
+- `Project` → `Deployments` → wybierz deployment → `Functions` → sprawdź logi funkcji
+- `Project` → `Settings` → `Cron Jobs` → sprawdź historię wykonania cron jobs
+
+**Logi endpointów:**
+
+- Endpointy zwracają JSON z informacjami o wykonaniu:
+  - `ok: true/false`
+  - `generated` (dla generate-signals) - liczba wygenerowanych sygnałów
+  - `inserted` (dla sync-price-history) - liczba zsynchronizowanych rekordów
+  - `error` - w przypadku błędu
+
+### 7. Dostosowanie harmonogramu
+
+Jeśli chcesz zmienić częstotliwość wykonywania cron jobs:
+
+1. **Przez `vercel.json`** (zalecane):
+
+   ```json
+   {
+     "crons": [
+       {
+         "path": "/api/admin/cron/generate-signals",
+         "schedule": "*/30 * * * *" // co 30 minut
+       }
+     ]
+   }
+   ```
+
+2. **Przez Vercel Dashboard**:
+   - `Project` → `Settings` → `Cron Jobs`
+   - Edytuj istniejący cron lub dodaj nowy
+   - Ustaw harmonogram i nagłówki
+
+### 8. Status
+
+✅ **Zaimplementowane:**
+
+- Endpointy `/api/admin/cron/generate-signals` i `/api/admin/cron/sync-price-history`
+- Autoryzacja przez `X-CRON-SECRET` header
+- Użycie `SUPABASE_SERVICE_ROLE_KEY` dla bypassu RLS
+- Konfiguracja w `vercel.json`
+- Dokumentacja w `docs/env.cloud.example`
+
+📝 **Do zrobienia (opcjonalnie):**
+
+- Testy E2E dla endpointów cron (w środowisku preview)
+- Monitoring i alerty dla błędów cron
+- Dashboard metryk (liczba wygenerowanych sygnałów, częstotliwość błędów)

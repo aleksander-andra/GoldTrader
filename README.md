@@ -114,7 +114,12 @@ Open `http://localhost:4321`.
 ## GoldTrader MVP status
 
 Aktualny stan funkcjonalności GoldTradera (auth, dashboard sygnałów XAUUSD, panel admina do assets, API + E2E/CI/CD) jest śledzony w pliku `docs/mvp-tracker.md` — tam znajdziesz checklistę MVP oraz historię raportów z 10xDevs.  
-Planujemy (po MVP) podpięcie Vercel Cron do endpointu `POST /api/admin/generate-signals`; szkic rozwiązania i uwagi bezpieczeństwa opisuje `docs/vercel-cron-generate-signals.md`.
+✅ **Vercel Cron Jobs** są zaimplementowane i skonfigurowane w `vercel.json`:
+
+- Automatyczne generowanie sygnałów: `/api/admin/cron/generate-signals` (co godzinę)
+- Synchronizacja historii cen: `/api/admin/cron/sync-price-history` (codziennie o 06:00 UTC)
+
+Szczegółowa dokumentacja: `docs/vercel-cron-generate-signals.md`
 
 ### Forecast engine (baseline XAUUSD)
 
@@ -163,6 +168,12 @@ Publiczny podgląd aktualnej prognozy jest dostępny pod `GET /api/forecast/xauu
    PUBLIC_SUPABASE_URL      = https://TWÓJ_PROJECT_REF.supabase.co
    PUBLIC_SUPABASE_ANON_KEY = TWÓJ_CLOUD_ANON_KEY
 
+   # Service Role Key (dla cron jobs - NIE udostępniaj w przeglądarce!)
+   SUPABASE_SERVICE_ROLE_KEY = TWÓJ_SERVICE_ROLE_KEY
+
+   # Secret dla autoryzacji cron jobs (wygeneruj: openssl rand -hex 32)
+   CRON_SECRET               = LOSOWY_BEZPIECZNY_STRING
+
    APP_URL                  = https://twoj-projekt.vercel.app   # po pierwszym deployu podmień na realny URL
    NODE_ENV                 = production
    ```
@@ -186,7 +197,17 @@ Publiczny podgląd aktualnej prognozy jest dostępny pod `GET /api/forecast/xauu
 
    Connection string do Session Poolera (host `*.pooler.supabase.com`, port `6543`) znajdziesz w Supabase → **Database → Connection pooling (Session)**.
 
-6. **Pierwszy deploy**
+6. **Konfiguracja Vercel Cron Jobs (opcjonalnie)**
+   - Cron jobs są już skonfigurowane w `vercel.json`:
+     - Generowanie sygnałów: co godzinę (`0 * * * *`)
+     - Synchronizacja historii cen: codziennie o 06:00 UTC (`0 6 * * *`)
+   - W Vercel Dashboard (`Project` → `Settings` → `Cron Jobs`) dodaj nagłówki dla każdego cron job:
+     - Header: `X-CRON-SECRET`
+     - Value: wartość z `CRON_SECRET` (ENV variable)
+   - Alternatywnie, możesz edytować harmonogram w `vercel.json` przed deployem.
+   - Szczegóły: `docs/vercel-cron-generate-signals.md`
+
+7. **Pierwszy deploy**
    - Zrób mały commit na `main` lub kliknij „Deploy” w Vercel.
    - Po udanym buildzie aplikacja będzie dostępna pod adresem w stylu `https://gold-trader-one.vercel.app/`.
    - Zaktualizuj `APP_URL` w Vercel na ten finalny URL.
