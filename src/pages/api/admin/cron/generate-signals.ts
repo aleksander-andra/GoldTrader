@@ -16,8 +16,10 @@ export const prerender = false;
  * Body (POST) lub query params (GET, opcjonalnie): { symbol?: string; validFromOffsetMinutes?: number; validToOffsetMinutes?: number; lookbackMinutes?: number }
  */
 async function handleRequest(context: APIContext) {
-  // Weryfikuj secret header
-  const cronSecret = context.request.headers.get("x-cron-secret");
+  // Weryfikuj secret: preferuj nagłówek, ale pozwól też na query param `?secret=` (dla Vercel Cron)
+  const urlObj = new URL(context.request.url);
+  const secretFromQuery = urlObj.searchParams.get("secret");
+  const cronSecret = context.request.headers.get("x-cron-secret") ?? secretFromQuery;
   const expectedSecret = import.meta.env.CRON_SECRET;
 
   if (!expectedSecret) {
