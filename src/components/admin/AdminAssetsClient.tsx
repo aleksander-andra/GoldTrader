@@ -67,7 +67,8 @@ export function AdminAssetsClient() {
         return;
       }
       const json = (await res.json()) as { items?: Asset[] };
-      setState({ status: "ready", assets: json.items ?? [] });
+      const assets = json.items ?? [];
+      setState({ status: "ready", assets });
     });
   }, []);
 
@@ -247,7 +248,7 @@ export function AdminAssetsClient() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900 mb-3">Aktywa</h2>
+        <h2 className="mb-3 text-lg font-semibold text-slate-900">Aktywa</h2>
         {assets.length === 0 ? (
           <p className="text-sm text-slate-600">Brak aktyw. Dodaj pierwsze aktywo powyżej.</p>
         ) : (

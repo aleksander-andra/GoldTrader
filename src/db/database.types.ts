@@ -83,6 +83,12 @@ export interface Database {
           ts: string;
           type: "BUY" | "SELL" | "HOLD";
           confidence: number;
+          status: "candidate" | "accepted" | "rejected" | "expired" | null;
+          forecast_price: number | null;
+          valid_from: string | null;
+          valid_to: string | null;
+          realized_price: number | null;
+          realized_direction: "UP" | "DOWN" | "FLAT" | null;
           meta_json: Json;
           created_at: string;
         };
@@ -93,6 +99,12 @@ export interface Database {
           ts: string;
           type: "BUY" | "SELL" | "HOLD";
           confidence: number;
+          status?: "candidate" | "accepted" | "rejected" | "expired" | null;
+          forecast_price?: number | null;
+          valid_from?: string | null;
+          valid_to?: string | null;
+          realized_price?: number | null;
+          realized_direction?: "UP" | "DOWN" | "FLAT" | null;
           meta_json?: Json;
           created_at?: string;
         };
@@ -102,6 +114,12 @@ export interface Database {
           ts?: string;
           type?: "BUY" | "SELL" | "HOLD";
           confidence?: number;
+          status?: "candidate" | "accepted" | "rejected" | "expired" | null;
+          forecast_price?: number | null;
+          valid_from?: string | null;
+          valid_to?: string | null;
+          realized_price?: number | null;
+          realized_direction?: "UP" | "DOWN" | "FLAT" | null;
           meta_json?: Json;
           created_at?: string;
         };

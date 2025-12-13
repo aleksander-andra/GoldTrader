@@ -34,3 +34,9 @@ pnpm-debug.log*
  
 # local bare repo or temp git dirs
 goldtrader.git/
+
+# debug screenshots
+debug-*.png
+
+# test results
+test-results/

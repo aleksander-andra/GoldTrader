@@ -10,5 +10,3 @@ import { getSupabaseBrowser } from "../../lib/auth/browserClient";
     window.location.assign("/");
   }
 })();
-
-

@@ -54,15 +54,13 @@ async function main() {
   const userId = user.id;
 
   // 2) Upsert profile with role 'admin'
-  const { error: upsertError } = await supabase
-    .from("profiles")
-    .upsert(
-      {
-        user_id: userId,
-        role: "admin",
-      },
-      { onConflict: "user_id" }
-    );
+  const { error: upsertError } = await supabase.from("profiles").upsert(
+    {
+      user_id: userId,
+      role: "admin",
+    },
+    { onConflict: "user_id" }
+  );
 
   if (upsertError) {
     console.error("Failed to upsert admin profile:", upsertError.message);
@@ -77,5 +75,3 @@ main().catch((err) => {
   console.error("Unexpected error in seed-admin script:", err instanceof Error ? err.message : err);
   process.exit(1);
 });
-
-

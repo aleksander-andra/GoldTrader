@@ -2,8 +2,14 @@ import type { APIContext } from "astro";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../../db/database.types";
 
-type Ok<T> = { ok: true; value: T };
-type Err = { ok: false; response: Response };
+interface Ok<T> {
+  ok: true;
+  value: T;
+}
+interface Err {
+  ok: false;
+  response: Response;
+}
 
 function unauthorized(message = "Unauthorized"): Err {
   return {
@@ -32,9 +38,7 @@ function getBearerToken(context: APIContext): string | null {
   return authHeader.slice(7).trim();
 }
 
-export async function requireUser(
-  context: APIContext
-): Promise<Ok<{ userId: string }> | Err> {
+export async function requireUser(context: APIContext): Promise<Ok<{ userId: string }> | Err> {
   const supabase = context.locals.supabase as SupabaseClient<Database> | undefined;
   if (!supabase) {
     return unauthorized("Supabase client not available");
@@ -53,9 +57,7 @@ export async function requireUser(
   return { ok: true, value: { userId: data.user.id } };
 }
 
-export async function requireAdmin(
-  context: APIContext
-): Promise<Ok<{ userId: string; role: "admin" }> | Err> {
+export async function requireAdmin(context: APIContext): Promise<Ok<{ userId: string; role: "admin" }> | Err> {
   const userRes = await requireUser(context);
   if (!userRes.ok) return userRes;
 
@@ -85,5 +87,3 @@ export async function requireAdmin(
 
   return { ok: true, value: { userId: userRes.value.userId, role: "admin" } };
 }
-
-

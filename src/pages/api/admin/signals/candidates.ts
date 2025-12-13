@@ -1,23 +1,16 @@
 import type { APIContext } from "astro";
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "../../../db/database.types";
-import { enforceDailyLimit } from "../../../lib/limits/daily";
+import type { Database } from "../../../../db/database.types";
+import { requireAdmin } from "../../../../lib/auth/rbac";
 
 export const prerender = false;
 
-// GET /api/signals?symbol=XAUUSD
+// GET /api/admin/signals/candidates?symbol=XAUUSD&limit=50
+// Zwraca sygnały w statusie 'candidate' (kandydaci do akceptacji), opcjonalnie
+// filtrowane po symbolu aktywa.
 export async function GET(context: APIContext) {
-  // Daily limit for listing signals (per user, per day)
-  const limit = await enforceDailyLimit(context, "signals:list", 100);
-  if (!limit.ok) return limit.response;
-
-  const authHeader = context.request.headers.get("authorization");
-  if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const admin = await requireAdmin(context);
+  if (!admin.ok) return admin.response;
 
   const url = import.meta.env.SUPABASE_URL;
   const anon = import.meta.env.SUPABASE_ANON_KEY;
@@ -28,12 +21,17 @@ export async function GET(context: APIContext) {
     });
   }
 
+  const tokenHeader = context.request.headers.get("authorization");
+
   const supabase = createClient<Database>(url, anon, {
-    global: { headers: { Authorization: authHeader } },
+    global: tokenHeader ? { headers: { Authorization: tokenHeader } } : undefined,
   });
 
   const requestUrl = new URL(context.request.url);
   const symbol = requestUrl.searchParams.get("symbol") ?? "XAUUSD";
+  const limitParam = requestUrl.searchParams.get("limit");
+  const limitNum = limitParam ? Number(limitParam) : Number.NaN;
+  const limit = Number.isFinite(limitNum) && limitNum > 0 ? Math.min(100, Math.floor(limitNum)) : 50;
 
   let assetId: string | undefined;
   if (symbol) {
@@ -60,15 +58,14 @@ export async function GET(context: APIContext) {
     assetId = asset.id;
   }
 
-  const nowIso = new Date().toISOString();
-
   const baseQuery = supabase
     .from("signals")
-    .select("*")
-    .eq("status", "accepted")
-    .gt("valid_to", nowIso)
+    .select(
+      "id, asset_id, type, confidence, status, valid_from, valid_to, strategy_id, strategies(name,type), assets(symbol)"
+    )
+    .eq("status", "candidate")
     .order("valid_from", { ascending: true })
-    .limit(100);
+    .limit(limit);
 
   const finalQuery = assetId ? baseQuery.eq("asset_id", assetId) : baseQuery;
 
@@ -82,10 +79,7 @@ export async function GET(context: APIContext) {
   }
 
   return new Response(JSON.stringify({ items: data ?? [] }), {
-    headers: {
-      "Content-Type": "application/json",
-      "X-RateLimit-Limit": String(limit.limit),
-      "X-RateLimit-Remaining": String(limit.remaining),
-    },
+    status: 200,
+    headers: { "Content-Type": "application/json" },
   });
 }

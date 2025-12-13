@@ -1,20 +1,29 @@
 import type { APIContext } from "astro";
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "../../../db/database.types";
-import type { SupabaseDbClient } from "../../../db/supabase.client";
-import { requireAdmin } from "../../../lib/auth/rbac";
-import { enforceDailyLimit } from "../../../lib/limits/daily";
-import { generateSignalsForAsset } from "../../../lib/signals/generationService";
+import type { Database } from "../../../../db/database.types";
+import type { SupabaseDbClient } from "../../../../db/supabase.client";
+import { requireAdmin } from "../../../../lib/auth/rbac";
+import { enforceDailyLimit } from "../../../../lib/limits/daily";
+import { generateSignalsForAsset } from "../../../../lib/signals/generationService";
+import { refreshAssetEvents } from "../../../../lib/news/newsRefreshService";
 
 export const prerender = false;
 
-// POST /api/admin/generate-signals
-// Body (opcjonalnie): { symbol?: string; count?: number }
+// POST /api/admin/signals/refresh-and-generate
+// Body (opcjonalnie):
+// {
+//   symbol?: string;
+//   count?: number;
+//   validForMinutes?: number;
+//   lookbackMinutes?: number;
+//   validFromOffsetMinutes?: number;
+//   validToOffsetMinutes?: number;
+// }
 export async function POST(context: APIContext) {
   const admin = await requireAdmin(context);
   if (!admin.ok) return admin.response;
 
-  const daily = await enforceDailyLimit(context, "signals:generate", 20);
+  const daily = await enforceDailyLimit(context, "signals:refresh-generate", 10);
   if (!daily.ok) return daily.response;
 
   const authHeader = context.request.headers.get("authorization");
@@ -38,7 +47,6 @@ export async function POST(context: APIContext) {
   try {
     body = await context.request.json();
   } catch {
-    // body opcjonalne – traktujemy brak jako {}
     body = {};
   }
 
@@ -51,10 +59,9 @@ export async function POST(context: APIContext) {
       validFromOffsetMinutes?: unknown;
       validToOffsetMinutes?: unknown;
     }) ?? {};
+
   const symbolStr = typeof symbol === "string" && symbol.trim() ? symbol.trim() : "XAUUSD";
 
-  // Na razie generujemy dokładnie 1 sygnał na wywołanie. Pole `count` zostanie
-  // wykorzystane, gdy dodamy wiele strategii / wariantów generowania.
   let countNum = 1;
   if (typeof count === "number" && Number.isFinite(count)) {
     countNum = Math.max(1, Math.min(50, Math.floor(count)));
@@ -81,11 +88,21 @@ export async function POST(context: APIContext) {
     toOffsetMins = Math.max(minTo, Math.min(7 * 24 * 60, Math.floor(validToOffsetMinutes)));
   }
 
+  // Najpierw odśwież newsy dla wskazanego assetu (XAUUSD itp.).
+  try {
+    await refreshAssetEvents(symbolStr.toUpperCase());
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to refresh asset events before generating signals";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const supabase = createClient<Database>(url, anon, {
     global: { headers: { Authorization: authHeader } },
   }) as SupabaseDbClient;
 
-  // 1) Znajdź aktywo
   const assetResult = await supabase.from("assets").select("id").eq("symbol", symbolStr).maybeSingle();
   const asset = assetResult.data as { id: string } | null;
   const assetError = assetResult.error;
