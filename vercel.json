@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/admin/cron/generate-signals",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/admin/cron/sync-price-history",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/admin/cron/sync-all-assets-price-history",
+      "schedule": "0 7 * * *"
+    }
+  ]
+}
