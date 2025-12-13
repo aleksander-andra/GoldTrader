@@ -19,6 +19,11 @@ const config: PlaywrightTestConfig = {
     baseURL,
     // Optional video recording for debugging: set PW_VIDEO=on before running tests.
     video: videoMode,
+    // Dla lepszej kompatybilności z Supabase Auth - upewnij się, że cookies są akceptowane
+    acceptDownloads: true,
+    // Zwiększ timeout dla żądań sieciowych (Supabase może potrzebować więcej czasu)
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
   },
   reporter: [["list"]],
   globalTeardown: "./tests/globalTeardown.ts",

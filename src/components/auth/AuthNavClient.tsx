@@ -57,14 +57,17 @@ export function AuthNavClient() {
       )}
       {status === "user" && (
         <>
-          <a href="/profile" id="link-profile" className="flex items-center gap-2 text-blue-600 hover:underline">
-            <span>Profil</span>
-            {role === "admin" && (
+          {role === "admin" ? (
+            <a href="/profile" id="link-profile" className="text-blue-600 hover:underline">
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 border border-emerald-300">
                 admin
               </span>
-            )}
-          </a>
+            </a>
+          ) : (
+            <a href="/profile" id="link-profile" className="text-blue-600 hover:underline">
+              Twoje konto
+            </a>
+          )}
           <a href="/auth/logout" id="link-logout" className="text-blue-600 hover:underline">
             Wyloguj
           </a>
