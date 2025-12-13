@@ -24,9 +24,8 @@ function getServiceRoleClient() {
   });
 }
 
-export async function syncDailyPriceHistoryForXauusd(): Promise<{ inserted: number }> {
+export async function syncDailyPriceHistoryForAsset(symbol: string): Promise<{ inserted: number }> {
   const client = getServiceRoleClient();
-  const symbol = "XAUUSD";
   const timeframe = "1d";
 
   const resp = await fetchDailyOhlcForAsset(symbol);
@@ -67,4 +66,9 @@ export async function syncDailyPriceHistoryForXauusd(): Promise<{ inserted: numb
   }
 
   return { inserted: rows.length };
+}
+
+// Backwards-compatible helper for existing jobs/endpoints focused on XAUUSD.
+export async function syncDailyPriceHistoryForXauusd(): Promise<{ inserted: number }> {
+  return syncDailyPriceHistoryForAsset("XAUUSD");
 }

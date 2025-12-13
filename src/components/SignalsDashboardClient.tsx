@@ -61,11 +61,15 @@ export function SignalsDashboardClient() {
       }
       const assetId = assetRow.id;
 
+      const nowIso = new Date().toISOString();
+
       const { data: signalsRaw, error: signalsError } = (await supabase
         .from("signals")
-        .select("id, ts, type, confidence, asset_id, strategy_id, strategies(name)")
+        .select("id, ts, type, confidence, asset_id, strategy_id, valid_from, valid_to, status, strategies(name)")
         .eq("asset_id", assetId)
-        .order("ts", { ascending: false })
+        .eq("status", "accepted")
+        .gt("valid_to", nowIso)
+        .order("valid_from", { ascending: true })
         .limit(20)) as unknown as {
         data: SignalWithStrategy[] | null;
         error: { message: string } | null;
@@ -192,22 +196,21 @@ export function SignalsDashboardClient() {
       <BaselineForecastCard />
       <ForecastHistoryChart />
       <div className="flex items-baseline justify-between mb-3">
-        <h2 className="text-xl font-semibold text-slate-900">Ostatnie sygnały XAUUSD (mock)</h2>
+        <h2 className="text-xl font-semibold text-slate-900">Ostatnie sygnały XAUUSD</h2>
         <p className="text-xs text-slate-500">
-          Dane demonstracyjne • {signals.length > 0 ? `${signals.length} ostatnich sygnałów` : "brak sygnałów"}
+          Dane z silnika baseline • {signals.length > 0 ? `${signals.length} aktywnych sygnałów` : "brak sygnałów"}
         </p>
       </div>
       {signals.length === 0 ? (
         <p className="text-sm text-slate-600">
-          Brak sygnałów. Jako admin wywołaj endpoint <code>/api/admin/generate-signals</code>, aby wygenerować dane
-          mock.
+          Brak aktywnych sygnałów. Jako admin wygeneruj i zaakceptuj nowe sygnały w panelu <code>/admin/signals</code>.
         </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm border-collapse">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="py-2 pr-4 font-semibold">Czas (UTC)</th>
+                <th className="py-2 pr-4 font-semibold">Ważny (UTC)</th>
                 <th className="py-2 pr-4 font-semibold">Typ</th>
                 <th className="py-2 pr-4 font-semibold text-right">Pewność</th>
                 <th className="py-2 pr-4 font-semibold">Strategia</th>
@@ -216,9 +219,16 @@ export function SignalsDashboardClient() {
             <tbody>
               {signals.map((s) => {
                 const strategyName = s.strategies?.name ?? s.strategy_id;
+                const from = s.valid_from ? new Date(s.valid_from) : new Date(s.ts);
+                const to = s.valid_to ? new Date(s.valid_to) : null;
                 return (
                   <tr key={s.id} className="border-b last:border-0 border-slate-100 hover:bg-slate-50/80">
-                    <td className="py-2 pr-4 font-mono text-xs text-slate-700">{new Date(s.ts).toISOString()}</td>
+                    <td className="py-2 pr-4 font-mono text-xs text-slate-700 align-top">
+                      <div>{from.toISOString().replace("T", " ").replace("Z", " UTC")}</div>
+                      {to && (
+                        <div className="text-[10px] text-slate-400">do {to.toISOString().substring(11, 16)} UTC</div>
+                      )}
+                    </td>
                     <td className="py-2 pr-4">
                       <span
                         className={[
@@ -233,7 +243,7 @@ export function SignalsDashboardClient() {
                         {s.type}
                       </span>
                     </td>
-                    <td className="py-2 pr-4 text-slate-800">{s.confidence}%</td>
+                    <td className="py-2 pr-4 text-right text-slate-800">{s.confidence}%</td>
                     <td className="py-2 pr-4 text-xs font-mono text-slate-600">{strategyName}</td>
                   </tr>
                 );

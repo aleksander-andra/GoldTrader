@@ -23,4 +23,3 @@ import { getSupabaseBrowser } from "../../lib/auth/browserClient";
     console.error(e);
   }
 })();
-
