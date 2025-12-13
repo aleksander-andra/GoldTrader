@@ -1,6 +1,10 @@
 import React from "react";
+import { getSupabaseBrowser } from "../../lib/auth/browserClient";
+import type { Database } from "../../db/database.types";
 
 type Direction = "UP" | "DOWN" | "FLAT" | "BUY" | "SELL" | "HOLD";
+
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
 interface ForecastHistoryItem {
   asset: string;
@@ -24,10 +28,44 @@ interface HistoryResponse {
 }
 
 export function ForecastHistoryChart() {
+  const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
   const [data, setData] = React.useState<HistoryResponse | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
+  // Sprawdź rolę użytkownika
   React.useEffect(() => {
+    const supabase = getSupabaseBrowser();
+    if (!supabase) {
+      setIsAdmin(false);
+      return;
+    }
+
+    supabase.auth
+      .getUser()
+      .then(async ({ data, error }) => {
+        if (error || !data?.user) {
+          setIsAdmin(false);
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .maybeSingle();
+
+        const role = (profile as Pick<ProfileRow, "role"> | null)?.role ?? "user";
+        setIsAdmin(role === "admin");
+      })
+      .catch(() => {
+        setIsAdmin(false);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    // Ładuj dane tylko jeśli użytkownik jest adminem
+    if (isAdmin !== true) return;
+
     let cancelled = false;
 
     const run = async () => {
@@ -83,7 +121,16 @@ export function ForecastHistoryChart() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isAdmin]);
+
+  // Nie wyświetlaj komponentu jeśli użytkownik nie jest adminem
+  if (isAdmin === null) {
+    return null; // Czekamy na sprawdzenie roli
+  }
+
+  if (isAdmin === false) {
+    return null; // Zwykli użytkownicy nie widzą tego wykresu
+  }
 
   if (!data && !error) {
     return (
