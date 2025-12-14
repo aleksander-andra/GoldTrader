@@ -57,6 +57,9 @@ export function AuthNavClient() {
       )}
       {status === "user" && (
         <>
+          <a href="/chatbot" className="text-blue-600 hover:underline">
+            Chatbot
+          </a>
           {role === "admin" ? (
             <a href="/profile" id="link-profile" className="text-blue-600 hover:underline">
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 border border-emerald-300">
