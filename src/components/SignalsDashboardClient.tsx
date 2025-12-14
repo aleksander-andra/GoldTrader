@@ -22,10 +22,26 @@ type State =
   | { status: "loading" }
   | { status: "anon" }
   | { status: "error"; message: string }
-  | { status: "ready"; signals: SignalWithStrategy[]; prices: PricePoint[]; forecast: PricePoint[] };
+  | {
+      status: "ready";
+      signals: SignalWithStrategy[];
+      prices: PricePoint[];
+      forecast: PricePoint[];
+      unit: string;
+      latestPrice: number;
+    };
 
 export function SignalsDashboardClient() {
   const [state, setState] = React.useState<State>({ status: "loading" });
+  const [currency, setCurrency] = React.useState<"USD" | "EUR" | "PLN">("USD");
+  const [unitDisplay, setUnitDisplay] = React.useState<string>("toz");
+
+  // Update unitDisplay when state.unit changes (only when status is ready)
+  React.useEffect(() => {
+    if (state.status === "ready" && state.unit) {
+      setUnitDisplay(state.unit);
+    }
+  }, [state.status, state.unit]);
 
   React.useEffect(() => {
     const supabase = getSupabaseBrowser();
@@ -84,14 +100,22 @@ export function SignalsDashboardClient() {
 
       // 3) Pobierz dane cenowe z /api/prices
       let prices: PricePoint[] = [];
+      let unit = "toz";
+      let latestPrice = 0;
       try {
         const res = await fetch("/api/prices?symbol=XAUUSD&range=1d");
         if (!res.ok) {
           const body = (await res.json().catch(() => ({}))) as { error?: string };
           throw new Error(body.error || `Błąd ładowania cen (${res.status})`);
         }
-        const json = (await res.json()) as { candles?: PricePoint[] };
+        const json = (await res.json()) as {
+          candles?: PricePoint[];
+          unit?: string;
+          latest_price?: number;
+        };
         prices = json.candles ?? [];
+        unit = json.unit || "toz";
+        latestPrice = json.latest_price || 0;
       } catch (e) {
         const message = e instanceof Error ? e.message : "Nie udało się pobrać danych cenowych.";
         setState({ status: "error", message });
@@ -124,6 +148,8 @@ export function SignalsDashboardClient() {
         signals: (signals as SignalWithStrategy[]) ?? [],
         prices,
         forecast,
+        unit,
+        latestPrice,
       });
     })().catch((e: unknown) => {
       const message = e instanceof Error ? e.message : "Unknown error";
@@ -157,38 +183,133 @@ export function SignalsDashboardClient() {
     );
   }
 
-  const { signals, prices, forecast } = state;
+  const { signals, prices, forecast, unit, latestPrice } = state;
+
+  // Exchange rates (simplified - in production, fetch from API)
+  const exchangeRates = {
+    USD: 1,
+    EUR: 0.92,
+    PLN: 4.0,
+  };
 
   const lastCandle = prices[prices.length - 1] ?? null;
-  const lastPrice = lastCandle?.c ?? null;
-  const lastTs = lastCandle ? new Date(lastCandle.t) : null;
+  const basePrice = lastCandle?.c ?? latestPrice;
+  const lastTs = lastCandle ? new Date(lastCandle.t) : new Date();
 
   const formatIsoUtc = (d: Date | null) => (d ? d.toISOString().replace("T", " ").replace("Z", " UTC") : "");
+
+  // Convert price based on currency and unit
+  // For gold: toz (troy ounce) = 31.1035g, standard oz = 28.3495g
+  // In trading, gold is typically quoted per troy ounce (toz)
+  let convertedPrice = basePrice * exchangeRates[currency];
+  let unitLabel = unit;
+
+  if (unit === "toz") {
+    if (unitDisplay === "g") {
+      // Convert from price per toz to price per gram
+      convertedPrice = (basePrice / 31.1035) * exchangeRates[currency];
+      unitLabel = "g";
+    } else {
+      // Keep as toz (display as oz for clarity)
+      unitLabel = "oz";
+    }
+  } else {
+    // For other units (lb, mt), keep as is
+    unitLabel = unit;
+  }
+
+  // Convert prices for chart based on selected currency and unit
+  // Only convert if currency is not USD or unit is changed
+  const convertPriceForChart = (price: number): number => {
+    let converted = price;
+
+    // Convert currency if not USD
+    if (currency !== "USD") {
+      converted = price * exchangeRates[currency];
+    }
+
+    // Convert unit if changed (only for gold/toz)
+    if (unit === "toz" && unitDisplay === "g") {
+      converted = converted / 31.1035;
+    }
+
+    return converted;
+  };
+
+  // Only convert if currency is not USD or unit is changed
+  const needsConversion = currency !== "USD" || (unit === "toz" && unitDisplay === "g");
+
+  const convertedPrices = needsConversion
+    ? prices.map((p) => ({
+        t: p.t,
+        c: convertPriceForChart(p.c),
+        o: convertPriceForChart(p.o),
+        h: convertPriceForChart(p.h),
+        l: convertPriceForChart(p.l),
+      }))
+    : prices;
+
+  const convertedForecast = needsConversion
+    ? forecast.map((p) => ({
+        t: p.t,
+        c: convertPriceForChart(p.c),
+        o: convertPriceForChart(p.o),
+        h: convertPriceForChart(p.h),
+        l: convertPriceForChart(p.l),
+      }))
+    : forecast;
 
   return (
     <section className="mt-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
       <div className="mb-6">
-        <div className="flex items-baseline justify-between mb-1">
-          <h2 className="text-lg font-semibold text-slate-900">XAUUSD — podgląd wykresu</h2>
-          {lastPrice !== null && (
-            <p className="text-xs text-slate-600 font-mono">
-              Ostatnia cena: <span className="font-semibold text-slate-900">{lastPrice.toFixed(2)} USD/toz</span>{" "}
-              <span className="text-slate-400">({formatIsoUtc(lastTs)})</span>
-            </p>
-          )}
+        <div className="flex items-baseline justify-between mb-2">
+          <h2 className="text-lg font-semibold text-slate-900">XAUUSD — wykres cenowy</h2>
+          <div className="flex items-center gap-2">
+            {basePrice > 0 && (
+              <div className="flex items-center gap-2">
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value as "USD" | "EUR" | "PLN")}
+                  className="text-xs border border-slate-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  title="Wybierz walutę"
+                >
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="PLN">PLN</option>
+                </select>
+                {unit === "toz" && (
+                  <select
+                    value={unitDisplay}
+                    onChange={(e) => setUnitDisplay(e.target.value)}
+                    className="text-xs border border-slate-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    title="Wybierz jednostkę"
+                  >
+                    <option value="toz">oz</option>
+                    <option value="g">g</option>
+                  </select>
+                )}
+                <p className="text-xs text-slate-600 font-mono">
+                  <span className="font-semibold text-slate-900">
+                    {convertedPrice.toFixed(2)} {currency}/{unitLabel}
+                  </span>
+                  <span className="text-slate-400 ml-1">({formatIsoUtc(lastTs)})</span>
+                </p>
+              </div>
+            )}
+          </div>
         </div>
         <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
-          Wykres poglądowy XAUUSD na podstawie danych z endpointu /api/prices.
+          Wykres XAUUSD na podstawie danych z Metals.dev API.
         </p>
         <div className="relative h-56 w-full rounded-xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
           {prices.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-400">
-              Brak danych cenowych (mock)
+              Ładowanie danych cenowych...
             </div>
           ) : (
             <XauusdChartClient
-              prices={prices.map((p) => ({ t: p.t, c: p.c }))}
-              forecast={forecast.map((p) => ({ t: p.t, c: p.c }))}
+              prices={convertedPrices.map((p) => ({ t: p.t, c: p.c }))}
+              forecast={convertedForecast.map((p) => ({ t: p.t, c: p.c }))}
             />
           )}
         </div>

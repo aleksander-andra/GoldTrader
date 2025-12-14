@@ -1,12 +1,51 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { RegisterForm } from "../../components/auth/RegisterForm";
+import { TradingBackground } from "../../components/ui/TradingBackground";
 ---
 
-<Layout title="Rejestracja">
-  <h1 class="text-2xl font-semibold text-center my-6">Rejestracja</h1>
-  <RegisterForm client:load />
-  <p class="text-center mt-4">
-    Masz już konto? <a href="/auth/login" class="text-blue-600">Zaloguj się</a>
-  </p>
+<Layout title="Rejestracja – GoldTrader">
+  <TradingBackground client:load />
+  <div class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center mb-4">
+          <div class="relative">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-full blur-lg opacity-30 animate-pulse"
+            >
+            </div>
+            <div class="relative bg-gradient-to-br from-amber-400 to-yellow-600 p-3 rounded-full">
+              <svg
+                class="size-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-2">GoldTrader</h1>
+        <p class="text-slate-600">Utwórz nowe konto</p>
+      </div>
+      <RegisterForm client:load />
+      <p class="text-center mt-6 text-sm text-slate-600">
+        Masz już konto?{" "}
+        <a
+          href="/auth/login"
+          class="text-amber-600 hover:text-amber-700 font-medium underline-offset-2 hover:underline"
+        >
+          Zaloguj się
+        </a>
+      </p>
+    </div>
+  </div>
 </Layout>

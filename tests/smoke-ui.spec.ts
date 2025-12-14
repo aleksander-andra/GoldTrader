@@ -11,8 +11,8 @@ async function loginAsUser(page: import("@playwright/test").Page) {
 
   await page.goto("/auth/login");
   await expect(page.getByTestId("login-form")).toHaveAttribute("data-hydrated", "true");
-  await page.getByPlaceholder("Email").fill(email);
-  await page.getByPlaceholder("Hasło").fill(password);
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Hasło").fill(password);
   await page.getByRole("button", { name: /zaloguj/i }).click();
   await page.waitForURL("**/");
   await page.waitForTimeout(500); // Daj czas na załadowanie dashboardu

@@ -6,14 +6,94 @@ import { DashboardGuard } from "../components/auth/DashboardGuard";
 
 <Layout title="Chatbot – GoldTrader">
   <DashboardGuard client:load>
-    <main class="max-w-4xl mx-auto px-4 py-6">
+    <main class="max-w-7xl mx-auto px-4 py-6">
       <header class="mb-6">
         <h1 class="text-3xl font-semibold text-slate-900">Asystent GoldTrader</h1>
         <p class="text-sm text-slate-600 mt-2">
           Zadaj pytanie o sygnały tradingowe, strategie, baseline forecast lub jak działa system.
         </p>
       </header>
-      <ChatBotClient client:load />
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Chat - główna kolumna -->
+        <div class="lg:col-span-2">
+          <ChatBotClient client:load />
+        </div>
+
+        <!-- Panel pomocniczy - zawsze widoczny -->
+        <div class="lg:col-span-1">
+          <div
+            class="sticky top-6 border border-slate-200 rounded-lg bg-white shadow-sm p-4 max-h-[600px] overflow-y-auto"
+          >
+            <h3 class="text-lg font-semibold text-slate-900 mb-3">💡 Co mogę dla Ciebie zrobić?</h3>
+
+            <div class="space-y-4 text-sm">
+              <div>
+                <p class="font-semibold text-slate-700 mb-2">📊 Analiza danych rynkowych:</p>
+                <ul class="space-y-1 text-xs text-slate-600">
+                  <li>• Pobieranie aktualnych cen metali (złoto, srebro, platyna, miedź, aluminium, itp.)</li>
+                  <li>• Analiza trendów i wykresów cenowych</li>
+                  <li>• Przegląd najnowszych newsów i wydarzeń rynkowych</li>
+                  <li>• Wyszukiwanie newsów po słowach kluczowych</li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-semibold text-slate-700 mb-2">📈 Sygnały tradingowe:</p>
+                <ul class="space-y-1 text-xs text-slate-600">
+                  <li>• Wyjaśnianie sygnałów BUY/SELL/HOLD</li>
+                  <li>• Pobieranie aktualnych aktywnych sygnałów</li>
+                  <li>• Analiza statystyczna sygnałów</li>
+                  <li>• Porównywanie skuteczności strategii</li>
+                  <li>• Interpretacja confidence i ważności</li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-semibold text-slate-700 mb-2">🔮 Prognozy i metryki:</p>
+                <ul class="space-y-1 text-xs text-slate-600">
+                  <li>• Aktualne prognozy baseline dla XAUUSD</li>
+                  <li>• Metryki jakości modelu (dla admina)</li>
+                  <li>• Wyjaśnianie jak działa baseline forecast</li>
+                  <li>• Analiza skuteczności prognoz</li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-semibold text-slate-700 mb-2">💡 System i funkcjonalności:</p>
+                <ul class="space-y-1 text-xs text-slate-600">
+                  <li>• Cykl życia sygnału</li>
+                  <li>• Role użytkownika i admina</li>
+                  <li>• Źródła danych (Metals.dev, Alpha Vantage)</li>
+                  <li>• Architektura systemu i API</li>
+                  <li>• Strategie tradingowe</li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-semibold text-slate-700 mb-2">🎯 Eksperckie porady:</p>
+                <ul class="space-y-1 text-xs text-slate-600">
+                  <li>• Analiza rynku metali i trendów</li>
+                  <li>• Interpretacja wskaźników technicznych</li>
+                  <li>• Rekomendacje tradingowe</li>
+                  <li>• Raporty i analizy na żądanie</li>
+                </ul>
+              </div>
+
+              <div class="pt-3 border-t border-slate-200">
+                <p class="text-xs text-slate-500 font-semibold mb-2">Przykłady pytań:</p>
+                <ul class="space-y-1 text-xs text-slate-600 italic">
+                  <li>"Jakie są aktualne sygnały?"</li>
+                  <li>"Jaka jest cena złota?"</li>
+                  <li>"Przeanalizuj sygnały"</li>
+                  <li>"Znajdź newsy o inflacji"</li>
+                  <li>"Jaki jest kurs platyny?"</li>
+                  <li>"Porównaj strategie"</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </DashboardGuard>
 </Layout>

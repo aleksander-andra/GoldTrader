@@ -17,8 +17,8 @@ async function loginAsAdmin(page: import("@playwright/test").Page) {
   await page.goto("/auth/login");
   await expect(page.getByTestId("login-form")).toHaveAttribute("data-hydrated", "true");
   await page.screenshot({ path: "debug-login.png", fullPage: true });
-  await page.getByPlaceholder("Email").fill(email ?? "");
-  await page.getByPlaceholder("Hasło").fill(password ?? "");
+  await page.getByLabel("Email").fill(email ?? "");
+  await page.getByLabel("Hasło").fill(password ?? "");
   await page.screenshot({ path: "debug-login-filled.png", fullPage: true });
   await page.waitForTimeout(500);
   await page.getByRole("button", { name: /zaloguj/i }).click();
