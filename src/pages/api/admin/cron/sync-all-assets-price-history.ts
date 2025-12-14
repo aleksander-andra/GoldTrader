@@ -15,24 +15,29 @@ export const prerender = false;
  * Body (POST) lub query params (GET, opcjonalnie): { symbols?: string[] } - jeśli podane, synchronizuje tylko te symbole
  */
 async function handleRequest(context: APIContext) {
-  // Weryfikuj secret: preferuj nagłówek, ale pozwól też na query param `?secret=` (dla Vercel Cron)
+  // Weryfikuj secret dla ręcznych wywołań; Vercel Cron identyfikujemy po nagłówku `x-vercel-cron: 1`
   const urlObj = new URL(context.request.url);
   const secretFromQuery = urlObj.searchParams.get("secret");
-  const cronSecret = context.request.headers.get("x-cron-secret") ?? secretFromQuery;
+  const headerSecret = context.request.headers.get("x-cron-secret");
+  const cronSecret = headerSecret ?? secretFromQuery;
+  const isVercelCron = context.request.headers.get("x-vercel-cron") === "1";
   const expectedSecret = import.meta.env.CRON_SECRET;
 
-  if (!expectedSecret) {
-    return new Response(JSON.stringify({ error: "CRON_SECRET not configured" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  // Jeśli to nie jest wywołanie z Vercel Cron, wymagaj skonfigurowanego CRON_SECRET i poprawnego secreta
+  if (!isVercelCron) {
+    if (!expectedSecret) {
+      return new Response(JSON.stringify({ error: "CRON_SECRET not configured" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-  if (!cronSecret || cronSecret !== expectedSecret) {
-    return new Response(JSON.stringify({ error: "Invalid or missing X-CRON-SECRET" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    if (!cronSecret || cronSecret !== expectedSecret) {
+      return new Response(JSON.stringify({ error: "Invalid or missing CRON secret" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
   }
 
   // Użyj service role key do pobrania listy assetów
@@ -97,7 +102,7 @@ async function handleRequest(context: APIContext) {
       });
     }
 
-    symbolsToSync = assets.map((a) => a.symbol.toUpperCase());
+    symbolsToSync = assets.map((a) => (a as { symbol: string }).symbol.toUpperCase());
   }
 
   // Synchronizuj każdy asset
