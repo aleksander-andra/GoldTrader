@@ -16,12 +16,13 @@ export const prerender = false;
  * Body (POST) lub query params (GET, opcjonalnie): { symbol?: string; validFromOffsetMinutes?: number; validToOffsetMinutes?: number; lookbackMinutes?: number }
  */
 async function handleRequest(context: APIContext) {
-  // Weryfikuj secret dla ręcznych wywołań; Vercel Cron identyfikujemy po nagłówku `x-vercel-cron: 1`
+  // Weryfikuj secret dla ręcznych wywołań; Vercel Cron identyfikujemy po nagłówku `x-vercel-cron: 1` lub User-Agent
   const urlObj = new URL(context.request.url);
   const secretFromQuery = urlObj.searchParams.get("secret");
   const headerSecret = context.request.headers.get("x-cron-secret");
   const cronSecret = headerSecret ?? secretFromQuery;
-  const isVercelCron = context.request.headers.get("x-vercel-cron") === "1";
+  const userAgent = context.request.headers.get("user-agent") ?? "";
+  const isVercelCron = context.request.headers.get("x-vercel-cron") === "1" || userAgent.startsWith("vercel-cron/");
   const expectedSecret = import.meta.env.CRON_SECRET;
 
   // Jeśli to nie jest wywołanie z Vercel Cron, wymagaj skonfigurowanego CRON_SECRET i poprawnego secreta
