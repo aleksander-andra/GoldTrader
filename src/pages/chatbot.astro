@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ChatBotClient } from "../components/chatbot/ChatBotClient";
+import { DashboardGuard } from "../components/auth/DashboardGuard";
+---
+
+<Layout title="Chatbot – GoldTrader">
+  <DashboardGuard client:load>
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <header class="mb-6">
+        <h1 class="text-3xl font-semibold text-slate-900">Asystent GoldTrader</h1>
+        <p class="text-sm text-slate-600 mt-2">
+          Zadaj pytanie o sygnały tradingowe, strategie, baseline forecast lub jak działa system.
+        </p>
+      </header>
+      <ChatBotClient client:load />
+    </main>
+  </DashboardGuard>
+</Layout>
