@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../db/database.types";
 import { requireUser } from "../../lib/auth/rbac";
 import { enforceDailyLimit } from "../../lib/limits/daily";
+import { SYSTEM_PROMPT } from "../../lib/chatbot/systemPrompt";
+import { TOOLS_DEFINITIONS, executeTool } from "../../lib/chatbot/tools";
 
 export const prerender = false;
 
@@ -16,38 +18,7 @@ const OPENAI_MAX_TOKENS =
   import.meta.env.OPENAI_MAX_TOKENS_PER_CALL ||
   "1000";
 
-// Base system prompt (will be enhanced with user context)
-const BASE_SYSTEM_PROMPT = `Jesteś asystentem systemu GoldTrader - webowej aplikacji inwestycyjnej z sygnałami tradingowymi dla XAUUSD (złoto).
-
-## Twoje zadania:
-- Wyjaśniaj użytkownikom, co oznaczają sygnały tradingowe (BUY/SELL/HOLD)
-- Objaśniaj cykl życia sygnału: candidate → accepted/rejected → expired
-- Wyjaśniaj role użytkownika i admina
-- Pomagaj interpretować parametry: ważność od–do (valid_from/valid_to), confidence (0-100%)
-- Wyjaśniaj jak działa baseline forecast i backtest
-- Pomagaj zrozumieć metryki jakości modelu
-
-## Ważne informacje o systemie:
-
-### Sygnały tradingowe:
-- **Status**: candidate (kandydat) → accepted (zaakceptowany) → expired (wygasły) lub rejected (odrzucony)
-- **Type**: BUY (kupno), SELL (sprzedaż), HOLD (trzymaj)
-- **Confidence**: 0-100% - pewność sygnału
-- **Valid from/to**: przedział czasowy, w którym sygnał jest ważny
-- **Forecast price**: cena prognozowana w momencie generowania
-- **Realized price**: cena zrealizowana po zakończeniu ważności
-- **Hit**: czy prognoza była poprawna (true/false)
-
-### Role:
-- **User**: widzi tylko zaakceptowane i aktualnie ważne sygnały
-- **Admin**: może generować kandydatów, akceptować/odrzucać sygnały, zarządzać aktywami
-
-### Baseline forecast:
-- Prosty model kierunkowy dla XAUUSD (UP/DOWN/FLAT)
-- Pracuje na dziennych danych z price_history
-- Accuracy pokazuje trafność kierunku w oknie (np. 90 dni)
-
-Odpowiadaj krótko, zwięźle i pomocnie. Jeśli nie znasz odpowiedzi, powiedz to szczerze.`;
+// System prompt is now imported from lib/chatbot/systemPrompt.ts
 
 /**
  * Builds system prompt with user context (role, active signals)
@@ -100,7 +71,7 @@ async function buildSystemPromptWithContext(
     contextSection += `- **Aktywne sygnały**: brak\n`;
   }
 
-  return BASE_SYSTEM_PROMPT + contextSection;
+  return SYSTEM_PROMPT + contextSection;
 }
 
 /**
@@ -293,10 +264,13 @@ export async function POST(context: APIContext) {
     // Build system prompt with user context
     const systemPrompt = await buildSystemPromptWithContext(supabase, userRes.value.userId);
 
-    // Build messages array for OpenAI
-    const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
-      { role: "system", content: systemPrompt },
-    ];
+    // Build messages array for OpenAI (supports tool_calls)
+    const messages: {
+      role: "system" | "user" | "assistant" | "tool";
+      content: string | null;
+      tool_calls?: { id: string; type: "function"; function: { name: string; arguments: string } }[];
+      tool_call_id?: string;
+    }[] = [{ role: "system", content: systemPrompt }];
 
     // Add history (excluding the just-saved user message to avoid duplication)
     const historyWithoutLast = history.slice(0, -1);
@@ -307,60 +281,149 @@ export async function POST(context: APIContext) {
     // Add current user message
     messages.push({ role: "user", content: message.trim() });
 
-    // Call OpenAI
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: OPENAI_MODEL,
-        messages,
-        max_tokens: Number.isFinite(Number(OPENAI_MAX_TOKENS)) ? Number(OPENAI_MAX_TOKENS) : 1000,
-        temperature: 0.7,
-      }),
-    });
+    // Get user role for tools
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userRes.value.userId)
+      .maybeSingle();
+    const userRole = (profile?.role || "user") as "admin" | "user";
 
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => "Unknown error");
-      // eslint-disable-next-line no-console
-      console.error("OpenAI API error:", response.status, errorBody);
-      return new Response(
-        JSON.stringify({
-          error: "Failed to get response from AI",
-          details: response.status === 401 ? "Invalid API key" : "API error",
+    // Get base URL for API calls
+    const baseUrl = new URL(context.request.url).origin;
+    const authToken = authHeader.slice(7).trim();
+
+    // Call OpenAI with function calling support (iterative)
+    let finalResponse = "";
+    const maxIterations = 5; // Prevent infinite loops
+    let iteration = 0;
+
+    while (iteration < maxIterations) {
+      iteration++;
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: OPENAI_MODEL,
+          messages,
+          tools: TOOLS_DEFINITIONS,
+          tool_choice: "auto", // Let model decide when to use tools
+          max_tokens: Number.isFinite(Number(OPENAI_MAX_TOKENS)) ? Number(OPENAI_MAX_TOKENS) : 1000,
+          temperature: 0.7,
         }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => "Unknown error");
+        // eslint-disable-next-line no-console
+        console.error("OpenAI API error:", response.status, errorBody);
+        return new Response(
+          JSON.stringify({
+            error: "Failed to get response from AI",
+            details: response.status === 401 ? "Invalid API key" : "API error",
+          }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const data = (await response.json()) as {
+        choices?: {
+          message?: {
+            content?: string | null;
+            tool_calls?: {
+              id: string;
+              type: "function";
+              function: { name: string; arguments: string };
+            }[];
+          };
+        }[];
+        error?: { message?: string };
+      };
+
+      if (data.error) {
+        return new Response(
+          JSON.stringify({
+            error: data.error.message || "AI service error",
+          }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const choice = data.choices?.[0];
+      if (!choice?.message) {
+        return new Response(
+          JSON.stringify({
+            error: "No response from AI",
+          }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const aiMessage = choice.message;
+
+      // If there are tool calls, execute them
+      if (aiMessage.tool_calls && aiMessage.tool_calls.length > 0) {
+        // Add assistant message with tool calls to history
+        messages.push({
+          role: "assistant",
+          content: aiMessage.content || null,
+          tool_calls: aiMessage.tool_calls.map((tc) => ({
+            id: tc.id,
+            type: tc.type,
+            function: { name: tc.function.name, arguments: tc.function.arguments },
+          })),
+        });
+
+        // Execute all tool calls
+        const toolResults = await Promise.all(
+          aiMessage.tool_calls.map(async (toolCall) => {
+            const result = await executeTool(
+              {
+                id: toolCall.id,
+                name: toolCall.function.name,
+                arguments: toolCall.function.arguments,
+              },
+              supabase,
+              userRes.value.userId,
+              userRole,
+              baseUrl,
+              authToken
+            );
+            return {
+              role: "tool" as const,
+              tool_call_id: toolCall.id,
+              content: result.content,
+            };
+          })
+        );
+
+        // Add tool results to messages
+        messages.push(...toolResults);
+        continue; // Continue loop to get final response
+      }
+
+      // No tool calls - we have the final response
+      finalResponse = aiMessage.content || "Brak odpowiedzi";
+      break;
     }
 
-    const data = (await response.json()) as {
-      choices?: { message?: { content?: string } }[];
-      error?: { message?: string };
-    };
-
-    if (data.error) {
+    if (!finalResponse) {
       return new Response(
         JSON.stringify({
-          error: data.error.message || "AI service error",
-        }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const aiMessage = data.choices?.[0]?.message?.content;
-
-    if (!aiMessage) {
-      return new Response(
-        JSON.stringify({
-          error: "No response from AI",
+          error: "No final response from AI after tool calls",
         }),
         {
           status: 500,
@@ -370,11 +433,11 @@ export async function POST(context: APIContext) {
     }
 
     // Save assistant message
-    await saveMessage(supabase, currentSessionId, "assistant", aiMessage);
+    await saveMessage(supabase, currentSessionId, "assistant", finalResponse);
 
     return new Response(
       JSON.stringify({
-        message: aiMessage,
+        message: finalResponse,
         sessionId: currentSessionId,
       }),
       {
