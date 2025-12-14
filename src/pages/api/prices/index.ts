@@ -8,9 +8,9 @@ const priceCache = new Map<string, { value: number; ts: number; unit: string }>(
 
 // Mapowanie symboli użytkownika na nazwy metali w Metals.dev API
 const METAL_SYMBOL_MAP: Record<string, { apiKey: string; unit: string; fallback: number }> = {
-  // Złoto
-  XAUUSD: { apiKey: "gold", unit: "toz", fallback: 2400 },
-  GOLD: { apiKey: "gold", unit: "toz", fallback: 2400 },
+  // Złoto (fallback: ~4300 USD/oz - aktualna cena z grudnia 2025)
+  XAUUSD: { apiKey: "gold", unit: "toz", fallback: 4300 },
+  GOLD: { apiKey: "gold", unit: "toz", fallback: 4300 },
   // Srebro
   XAGUSD: { apiKey: "silver", unit: "toz", fallback: 30 },
   SILVER: { apiKey: "silver", unit: "toz", fallback: 30 },
@@ -44,7 +44,11 @@ const METAL_SYMBOL_MAP: Record<string, { apiKey: string; unit: string; fallback:
  * API zwraca wszystkie metale w jednej odpowiedzi, więc pobieramy wszystkie i cache'ujemy
  */
 async function fetchAllMetalsPrices(): Promise<Record<string, number> | null> {
-  if (!METALS_API_KEY) return null;
+  if (!METALS_API_KEY) {
+    // eslint-disable-next-line no-console
+    console.warn("[prices] METALS_API_KEY not configured - using fallback prices");
+    return null;
+  }
 
   const cacheKey = "all_metals";
   const now = Date.now();
@@ -69,7 +73,12 @@ async function fetchAllMetalsPrices(): Promise<Record<string, number> | null> {
     const res = await fetch(url.toString(), {
       headers: { Accept: "application/json" },
     });
-    if (!res.ok) return null;
+
+    if (!res.ok) {
+      // eslint-disable-next-line no-console
+      console.error(`[prices] Metals.dev API error: ${res.status} ${res.statusText}`);
+      return null;
+    }
 
     const json = (await res.json()) as {
       metals?: {
@@ -87,7 +96,14 @@ async function fetchAllMetalsPrices(): Promise<Record<string, number> | null> {
       };
     } | null;
 
-    if (!json?.metals) return null;
+    if (!json?.metals) {
+      // eslint-disable-next-line no-console
+      console.warn("[prices] Metals.dev API returned no metals data");
+      return null;
+    }
+
+    // eslint-disable-next-line no-console
+    console.log("[prices] Successfully fetched metals prices from Metals.dev API:", Object.keys(json.metals));
 
     // Cache individual metal prices
     const metals = json.metals;
